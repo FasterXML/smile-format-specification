@@ -28,7 +28,7 @@ Smile Codecs
 * Java/JVM
     * [Jackson](../../../jackson) has full Smile support, including streaming access, data binding and tree model (i.e. parity with textual JSON)
     * [Protostuff]([http://code.google.com/p/protostuff/) project supports Smile both as a low-level data format, and as format used for its RPC implementation
-    * [Cheshire](https://github.com/dakrone/cheshire]] [Clojure](http://clojure.org) library with Jackson-based Smile, Java support
+    * [Cheshire](https://github.com/dakrone/cheshire) [Clojure](http://clojure.org) library with Jackson-based Smile, Java support
 * C
     * [libsmile](https://github.com/brianm/libsmile) is a small C-library for reading and writing Smile data.
 * Javascript
@@ -38,5 +38,6 @@ Smile Codecs
 
 Frameworks, Systems that use Smile codec (encoder and decoder)
 
-* [http://www.elasticsearch.org/](Elastic Search) supports Smile as one of input/output formats
+* [Elastic Search](http://www.elasticsearch.org/) uses Smile as transport format supports access using Smile encoding.
+
 
