@@ -91,7 +91,7 @@ Some general notes on tokens:
 * Strings are encoded using standard UTF-8 encoding; length is indicated either by using:
     * 6-bit byte length prefix, for lengths 1 - 63 (0 is not used since there is separate token)
     * End-of-String marker byte (0xFC) for variable length Strings.
-* Integral numeric values up to Java long (64-bit) are handled using {{{ZigZag}}}-encoded VInts (see Appendix for details):
+* Integral numeric values up to Java long (64-bit) are handled using `ZigZag`-encoded VInts (see Appendix for details):
     * sequence of 1 to 10 bytes that can represent all 64-bit numbers.
     * VInts are big endian, meaning that most-significant bytes come first
     * All bytes except for the last one have their MSB clear, leaving 7 data bits
@@ -316,7 +316,7 @@ This would be a simple addition.
 
 ### Chunked values
 
-(note: inspiration for this came from [[https://tools.ietf.org/html/rfc7049 | CBOR]] format)
+(note: inspiration for this came from [CBOR](https://tools.ietf.org/html/rfc7049) format)
 
 As an alternative for either requiring full content length (binary data), or end marker (long Strings, Objects, arrays),
 and to specifically allow better buffering during encoding, it might make sense to allow "chunked" variants wherein
@@ -330,12 +330,13 @@ more efficient and flexible decoding.
 
 #### ZigZag encoding for VInts
 
-Smile uses {{{ZigZag}}} encoding (defined for [[http://code.google.com/apis/protocolbuffers/docs/encoding.html | protobuf format]], see [[http://stackoverflow.com/questions/2210923/zig-zag-decoding | this example]]),
-which is a variant of generic [[http://en.wikipedia.org/wiki/Variable-length_quantity | VInts]] (Variable-length INTegers).
+Smile uses `ZigZag` encoding (defined for [protobuf format](http://code.google.com/apis/protocolbuffers/docs/encoding.html],
+(see [StackOverflow question]([http://stackoverflow.com/questions/2210923/zig-zag-decoding) for example)
+which is a variant of generic [VInts](http://en.wikipedia.org/wiki/Variable-length_quantity) (Variable-length INTegers).
 
 Encoding is done logically as a two-step process:
 
-1. Use {{{ZigZag}}} encoding to convert signed values to unsigned values: essentially this will "move the sign bit" as the LSB.
+1. Use `ZigZag` encoding to convert signed values to unsigned values: essentially this will "move the sign bit" as the LSB.
 2. Encode remaining bits of unsigned integral number, starting with the most significant bits: the last byte is indicated by setting the sign bit; all the other bytes have sign bit clear.
     * Last byte has only 6 data bits; second-highest bit MUST be clear (to ensure that value 0xFF is never used for encoding; values 0xC0 - 0xFF are not used for the last byte).
     * Other bytes have 7 data bits.
