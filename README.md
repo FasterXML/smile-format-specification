@@ -1,6 +1,7 @@
 # Smile Data Format
 
-"Smile" is a binary data format that defines a binary equivalent of standard [[http://en.wikipedia.org/wiki/JSON | JSON]] data format.
+"Smile" is a binary data format that defines a binary equivalent of standard
+[JSON](http://en.wikipedia.org/wiki/JSON) data format.
 
 Format was specified in 2010 by [Jackson](../../../jackson) JSON processor development team.
 First compliant implementation was included Jackson version 1.6, released in September 2010.
