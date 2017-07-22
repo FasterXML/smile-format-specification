@@ -25,11 +25,13 @@ Design documentation includes:
 
 Smile Codecs
 
-* Java/JVM
-    * [Jackson](../../../jackson) provides Smile support (through one of [Binary dataformat](../../../jackson-dataformats-binary) modules)
+* Java
+    * [Jackson](../../../jackson) provides Smile support through [jackson-dataformat-smile](../../../jackson-dataformats-binary) modules) format codec
         * Full support: including streaming access, data binding and tree model (100% parity with textual JSON)
-    * [Protostuff](http://code.google.com/p/protostuff/) project supports Smile both as a low-level data format, and as format used for its RPC implementation
-    * [Cheshire](https://github.com/dakrone/cheshire) [Clojure](http://clojure.org) library with Jackson-based Smile, Java support
+    * [Protostuff](http://github.com/protostuff/protostuff) project supports Smile both as a low-level data format, and as format used for its RPC implementation
+* JVM, other:
+    * [Clojure](http://clojure.org) 
+        * [Cheshire](https://github.com/dakrone/cheshire) library offers support via Jackson `jackson-dataformat-smile`
 * C
     * [libsmile](https://github.com/brianm/libsmile) is a small C-library for reading and writing Smile data.
 * Javascript
