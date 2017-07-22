@@ -1,25 +1,22 @@
-<<TableOfContents(4)>>
+# Efficient JSON-compatible binary format: "Smile"
 
-''' Efficient JSON-compatible binary format: "Smile" '''
-
-"Smile" is codename for an efficient JSON-compatible binary data format, initially developed by Jackson JSON processor project team.
+"Smile" is an efficient JSON-compatible binary data format, initially developed by Jackson JSON processor project team.
 Its logical data model is same as that of JSON, so it can be considered a "Binary JSON" format.
 
-For design on "Project Smile", which implements support for this format, see [[SmileFormatDesignGoals | Smile Format design goals]] page.
-
-For usage with [[JacksonHome | Jackson]] processor, see [[JacksonForSmile | Jackson SMILE usage]] page.
+For design on "Project Smile", which implements support for this format, see
+[Smile format Design goals])smile-design-goals.md).
 
 This page covers current data format specification; which is planned to eventually be standardized through a format process (most likely as IETF RFC).
 
-=== Document version ===
+## Document version
 
-==== Version history ====
+### Version history
 
  * Current: 1.0.4 (12-May-2013)
  * First official: 1.0.0 (12-Sep-2010)
  * First draft: (24-Jun-2010)
 
-==== Update history ====
+### Update history
 
  * 2016-02-23: Minor clarification on acceptable lengths for long non-shared names (different minimum for ascii, non-ascii)
  * 2015-12-10: Add Appendix B, list of known implementations
@@ -36,9 +33,9 @@ This page covers current data format specification; which is planned to eventual
  * 2010-08-26: Rearrange token byte values to make better use of 0xF8 - 0xFF area for framing.
  * 2010-08-20: Remove references to initially planned in-frame compression; add one more header flag, extend version info to 4 bits
 
-=== External Considerations ===
+## External Considerations
 
-==== MIME Type ====
+### MIME Type
 
 There is no formal or official MIME type registered for Smile content, but the current best practice (as of July 2011) is to use:
 
@@ -46,29 +43,29 @@ There is no formal or official MIME type registered for Smile content, but the c
 
 since this is used by multiple existing projects.
 
-=== High-level format ===
+## High-level format
 
 At high level, content encoded using this format consists of a simple sequence of sections, each of which consists of:
 
- * A 4-byte header (described below) that can be used to identify content that uses the format, as well as its version and any per-section configuration settings there may be.
- * Sequence (0 to N) of tokens that are properly nested (all start-object/start-array tokens are matched with equivalent close tokens) within sequence.
- * Optional end marker, 0xFF, can be used: if encountered, it will be consider same as end-of-stream. This is added as a convenience feature to help with framing.
+* A 4-byte header (described below) that can be used to identify content that uses the format, as well as its version and any per-section configuration settings there may be.
+* Sequence (0 to N) of tokens that are properly nested (all start-object/start-array tokens are matched with equivalent close tokens) within sequence.
+* Optional end marker, 0xFF, can be used: if encountered, it will be consider same as end-of-stream. This is added as a convenience feature to help with framing.
 
 Header consists of:
 
- * Constant byte #0: 0x3A (ASCII ':')
- * Constant byte #1: 0x29 (ASCII ')')
- * Constant byte #2: 0x0A (ASCII linefeed, '\n')
- * Variable byte #3, consisting of bits:
-  * Bits 4-7 (4 MSB): 4-bit version number; 0x00 for current version (note: it is possible that some bits may be reused if necessary)
-  * Bits 3: Reserved
-  * Bit 2 (mask 0x04) Whether '''raw binary''' (unescaped 8-bit) values may be present in content
-  * Bit 1 (mask 0x02): Whether '''shared String value''' checking was enabled during encoding -- if header missing, default value of "false" must be assumed for decoding (meaning parser need not store decoded String values for back referencing)
-  * Bit 0 (mask 0x01): Whether '''shared property name''' checking was enabled during encoding -- if header missing, default value of "true" must be assumed for decoding (meaning parser MUST store seen property names for possible back references)
+* Constant byte #0: 0x3A (ASCII ':')
+* Constant byte #1: 0x29 (ASCII ')')
+* Constant byte #2: 0x0A (ASCII linefeed, '\n')
+* Variable byte #3, consisting of bits:
+    * Bits 4-7 (4 MSB): 4-bit version number; 0x00 for current version (note: it is possible that some bits may be reused if necessary)
+    * Bits 3: Reserved
+    * Bit 2 (mask 0x04) Whether '''raw binary''' (unescaped 8-bit) values may be present in content
+    * Bit 1 (mask 0x02): Whether '''shared String value''' checking was enabled during encoding -- if header missing, default value of "false" must be assumed for decoding (meaning parser need not store decoded String values for back referencing)
+    * Bit 0 (mask 0x01): Whether '''shared property name''' checking was enabled during encoding -- if header missing, default value of "true" must be assumed for decoding (meaning parser MUST store seen property names for possible back references)
  
 And basically first 2 bytes form simple smiley and 3rd byte is a (Unix) linefeed: this to make command-line-tool based identification simple: choice of bytes is not significant beyond visual appearance. Fourth byte contains minimal versioning marker and additional configuration bits.
 
-=== Low-level Format ===
+## Low-level Format
 
 Each section described above consist of set of tokens that forms properly nested JSON value. Tokens are used in two basic modes: value mode (in which tokens are "value tokens"), and property-name mode ("key tokens"). Property-name mode is used within JSON Object values to denote property names, and alternates between name / value tokens.
 
@@ -76,64 +73,64 @@ Token lengths vary from a single byte (most common) to 9 bytes. In each case, fi
 
 Use of certain byte values is limited:
 
- * Values 0xFD through 0xFF are not used as token type markers, key markers, or in values; with exception of optional raw binary data (which can contain any values). Instead they are used to:
-  * 0xFF can be used as logical data end marker; this use is intended to be compatible with Web Sockets usage
-  * 0xFE is reserved for future use, and not used for anything currently.
-  * 0XFD is used as type marker for raw binary data, to allow for uniquely identifying raw binary data sections (note too that content header will have to explicitly enable support; without this content can not contain raw binary data sections)
-  * 0xFC is used as String end-marker (similar to use of zero byte with C strings) for long Strings that do not use length prefix.
-  * Since number encodings never use values 0xC0 - 0xFF, and UTF-8 does not use values 0xF8 - 0xFF, these are only uses within Smile format (except for possible raw binary data)
- * Values 0xF8 - 0xFB are only used for type tokens START_ARRAY, END_ARRAY, START_OBJECT and END_OBJECT (respectively); they are not used for String or numeric values of field names and can otherwise only occur in raw binary data sections.
- * Value 0x00 has no specific handling (can occur in variable length numeric values, as UTF-8 null characters and so on).
- * 0x3A is not used as type byte in either mode, since it is the first byte of 4-byte header sequence, and may thus be encountered after value tokens (and although it can not occur within key mode, it is reserved to increase chances of detecting corrupted content)
-  * Value can occur within many kinds of values (vints, String values)
+* Values 0xFD through 0xFF are not used as token type markers, key markers, or in values; with exception of optional raw binary data (which can contain any values). Instead they are used to:
+    * 0xFF can be used as logical data end marker; this use is intended to be compatible with Web Sockets usage
+    * 0xFE is reserved for future use, and not used for anything currently.
+    * 0XFD is used as type marker for raw binary data, to allow for uniquely identifying raw binary data sections (note too that content header will have to explicitly enable support; without this content can not contain raw binary data sections)
+    * 0xFC is used as String end-marker (similar to use of zero byte with C strings) for long Strings that do not use length prefix.
+    * Since number encodings never use values 0xC0 - 0xFF, and UTF-8 does not use values 0xF8 - 0xFF, these are only uses within Smile format (except for possible raw binary data)
+* Values 0xF8 - 0xFB are only used for type tokens START_ARRAY, END_ARRAY, START_OBJECT and END_OBJECT (respectively); they are not used for String or numeric values of field names and can otherwise only occur in raw binary data sections.
+* Value 0x00 has no specific handling (can occur in variable length numeric values, as UTF-8 null characters and so on).
+* 0x3A is not used as type byte in either mode, since it is the first byte of 4-byte header sequence, and may thus be encountered after value tokens (and although it can not occur within key mode, it is reserved to increase chances of detecting corrupted content)
+    * Value can occur within many kinds of values (vints, String values)
 
-==== Tokens: general ====
+### Tokens: general
 
 Some general notes on tokens:
 
- * Strings are encoded using standard UTF-8 encoding; length is indicated either by using:
-  * 6-bit byte length prefix, for lengths 1 - 63 (0 is not used since there is separate token)
-  * End-of-String marker byte (0xFC) for variable length Strings.
- * Integral numeric values up to Java long (64-bit) are handled using {{{ZigZag}}}-encoded VInts (see Appendix for details):
-  * sequence of 1 to 10 bytes that can represent all 64-bit numbers.
-  * VInts are big endian, meaning that most-significant bytes come first
-  * All bytes except for the last one have their MSB clear, leaving 7 data bits
-  * Last byte has its MSB (bit #7) set, but bit #6 NOT set (to avoid possibility of collision with 0xFF), leaving 6 data bits.
-  * This means that 2 byte VInt has 13 data bits, for example; and minimum number of bytes to represent a Java long (64 bits) is 10; 9 bytes would give 62 bits (8 * 7 + 6).
-  * Signed VInt values are handled using "zigzag" encoding, where sign bit is shifted to be the least-significant bit, and value is shifted left by one (i.e. multiplied by two).
-  * Unsigned VInts used as length indicators do NOT use zigzag encoding (since it is only needed to help with encoding of negative values)
- * Length indicators are done using VInts (for binary data, unlimited length ("big") integer/decimal values)
-  * All length indicators define _actual_ length of data; not possibly encoded length (in case of "safe" encoding, encoded data is longer, and that length can be calculated from payload data length)
- * Floating point values (IEEE 32 and 64-bit) are encoded using fixed-length big-endian encoding (7 bits used to avoid use of reserved bytes like 0xFF):
-  * Data is "right-aligned", meaning padding is prepended to the first byte (and its MSB).
- * "Big" decimal/integer values use "safe" binary encoding
- * "Safe" binary encoding simply uses 7 LSB: data is left aligned (i.e. any padding of the last byte is in its rightmost, least-significant, bits).
+* Strings are encoded using standard UTF-8 encoding; length is indicated either by using:
+    * 6-bit byte length prefix, for lengths 1 - 63 (0 is not used since there is separate token)
+    * End-of-String marker byte (0xFC) for variable length Strings.
+* Integral numeric values up to Java long (64-bit) are handled using {{{ZigZag}}}-encoded VInts (see Appendix for details):
+    * sequence of 1 to 10 bytes that can represent all 64-bit numbers.
+    * VInts are big endian, meaning that most-significant bytes come first
+    * All bytes except for the last one have their MSB clear, leaving 7 data bits
+    * Last byte has its MSB (bit #7) set, but bit #6 NOT set (to avoid possibility of collision with 0xFF), leaving 6 data bits.
+    * This means that 2 byte VInt has 13 data bits, for example; and minimum number of bytes to represent a Java long (64 bits) is 10; 9 bytes would give 62 bits (8 * 7 + 6).
+    * Signed VInt values are handled using "zigzag" encoding, where sign bit is shifted to be the least-significant bit, and value is shifted left by one (i.e. multiplied by two).
+    * Unsigned VInts used as length indicators do NOT use zigzag encoding (since it is only needed to help with encoding of negative values)
+* Length indicators are done using VInts (for binary data, unlimited length ("big") integer/decimal values)
+    * All length indicators define _actual_ length of data; not possibly encoded length (in case of "safe" encoding, encoded data is longer, and that length can be calculated from payload data length)
+* Floating point values (IEEE 32 and 64-bit) are encoded using fixed-length big-endian encoding (7 bits used to avoid use of reserved bytes like 0xFF):
+    * Data is "right-aligned", meaning padding is prepended to the first byte (and its MSB).
+* "Big" decimal/integer values use "safe" binary encoding
+* "Safe" binary encoding simply uses 7 LSB: data is left aligned (i.e. any padding of the last byte is in its rightmost, least-significant, bits).
 
-==== Tokens: value mode ====
+### Tokens: value mode
 
 Value is the default mode for tokens for main-level ("root") output context and JSON Array context. It is also used between JSON Object property name tokens (see next section).
 
 Conceptually tokens are divided in 8 classes, class defined by 3 MSB of the first byte:
 
- * 0x00 - 0x1F: Short Shared Value String reference (single byte)
- * 0x20 - 0x3F: Simple literals, numbers
- * 0x40 - 0x5F: Tiny ASCII (1 - 32 bytes == chars)
- * 0x60 - 0x7F: Short ASCII (33 - 64 bytes == chars)
- * 0x80 - 0x9F: Tiny Unicode (2 - 33 bytes; <= 33 characters)
- * 0xA0 - 0xBF: Short Unicode (34 - 64 bytes; <= 64 characters)
- * 0xC0 - 0xDF: Small integers (single byte)
- * 0xE0 - 0xFF: Binary / Long text / structure markers (0xF0 - 0xF7 is unused, reserved for future use -- but note, used in key mode)
+* 0x00 - 0x1F: Short Shared Value String reference (single byte)
+* 0x20 - 0x3F: Simple literals, numbers
+* 0x40 - 0x5F: Tiny ASCII (1 - 32 bytes == chars)
+* 0x60 - 0x7F: Short ASCII (33 - 64 bytes == chars)
+* 0x80 - 0x9F: Tiny Unicode (2 - 33 bytes; <= 33 characters)
+* 0xA0 - 0xBF: Short Unicode (34 - 64 bytes; <= 64 characters)
+* 0xC0 - 0xDF: Small integers (single byte)
+* 0xE0 - 0xFF: Binary / Long text / structure markers (0xF0 - 0xF7 is unused, reserved for future use -- but note, used in key mode)
 
 These token class are are described below.
 
-==== Token class: Short Shared Value String reference ====
+#### Token class: Short Shared Value String reference
 
 Prefix: 0x00; covers byte values 0x01 - 0x1F (0x00 not used as value type token)
 
  * 5 LSB used to get reference value of 1 - 31; 0 is not used with this version (reserved for future use)
  * Back reference resolved as explained in section 4.
 
-==== Token class: Simple literals, numbers ====
+#### Token class: Simple literals, numbers
 
 Prefix: 0x20; covers byte values 0x20 - 0x3F, although not all values are used
 
@@ -161,7 +158,7 @@ Prefix: 0x20; covers byte values 0x20 - 0x3F, although not all values are used
 
 Rest of the possible values are reserved for future use and not used currently.
 
-==== Token classes: Tiny ASCII, Small ASCII ====
+#### Token classes: Tiny ASCII, Small ASCII
 
 Prefixes: 0x40  / 0x60; covers all byte values between 0x40 and 0x7F.
 
@@ -172,25 +169,25 @@ Prefixes: 0x40  / 0x60; covers all byte values between 0x40 and 0x7F.
   * String with specified length; all bytes in ASCII range
   * 5 LSB used to indicate lengths from 33 to 64 (bytes == chars)
 
-==== Token classes: Tiny Unicode, Small Unicode ====
+#### Token classes: Tiny Unicode, Small Unicode
 
 Prefixes: 0x80  / 0xA0; covers all byte values between 0x80 and 0xBF; except that 0x80 is not encodable (since there is no 1 byte long multi-byte-character String)
 
- * 0x80 - 0x9F
-  * String with specified length; bytes NOT guaranteed to be in ASCII range
-  * 5 LSB used to indicate _byte_ lengths from 2 to 33 (with character length possibly less due to multi-byte characters)
-  * Length 1 can not be expressed, since only ASCII characters have single byte encoding (which means it should be encoded with "Tiny ASCII")
- * 0xA0 - 0xBF
-  * 5 LSB used to indicate _byte_ lengths from 34 to 65 (with character length possibly less due to multi-byte characters)
+* 0x80 - 0x9F
+    * String with specified length; bytes NOT guaranteed to be in ASCII range
+    * 5 LSB used to indicate _byte_ lengths from 2 to 33 (with character length possibly less due to multi-byte characters)
+    * Length 1 can not be expressed, since only ASCII characters have single byte encoding (which means it should be encoded with "Tiny ASCII")
+* 0xA0 - 0xBF
+    * 5 LSB used to indicate _byte_ lengths from 34 to 65 (with character length possibly less due to multi-byte characters)
 
-==== Token class: Small integers ====
+#### Token class: Small integers
 
 Prefix: 0xC0; covers byte values 0xC0 - 0xDF, all values used.
 
- * Zigzag encoded
- * 5 LSB used to get values from -16 to +15
+* Zigzag encoded
+* 5 LSB used to get values from -16 to +15
 
-==== Token class: Misc; binary / text / structure markers ====
+#### Token class: Misc; binary / text / structure markers
 
 Prefix: 0xE0; covers byte values 0xE0 - 0xEF, 0xF8 - 0xFF: 0xF8 - 0xFF not used with this format version (reserved for future use)
 
@@ -198,33 +195,33 @@ Note, too, that value 0x36 could be viewed as "real" END_OBJECT; but is not incl
 
 This class is further divided in 8 sub-section, using value of bits #2, #3 and #4 (0x1C) as follows:
 
- * 0xE0: Long (variable length) ASCII text
-  * 2 LSB (0x03): reserved for future use
-  * NOTE: these values are NOT back-referencable, so they do not participate in back-reference resolution (indexes/tables not updated)
- * 0xE4: Long (variable length) Unicode text
-  * 2 LSB (0x03): reserved for future use
-  * NOTE: these values are NOT back-referencable, so they do not participate in back-reference resolution (indexes/tables not updated)
- * 0xE8: Binary, 7-bit encoded
-  * 2 LSB (0x03): reserved for future use
-  * followed by VInt length indicator, then data in 7/8 encoding (only 7 LSB of each byte used; 8 such bytes are used to encode 7 "raw" bytes)  
- * 0xEC: Shared String reference, long
-  * 2 LSB (0x03): used as 2 MSB of index
-  * followed by byte used as 8 LSB of index
-  * Resulting 10-bit index used as is; values 0-30 are not to be used (instead, short reference must be used)
-  * Back references are ONLY made to "short" and "tiny" Ascii/Unicode Strings, so generator and parser only need to retain references to these Strings and not "long" (aka variable length) Strings.
- * 0xF0 - 0xF7: not used, reserved for future use (NOTE: used in key mode)
- * 0xF8 - 0xFB: Structural markers
-   * 0xF8: START_ARRAY
-   * 0xF9: END_ARRAY
-   * 0xFA: START_OBJECT
-   * 0xFB: reserved in token mode (but is END_OBJECT in key mode) -- this just because object end marker comes as alternative to property name.
- * 0xFC: Used as end-of-String marker
- * 0xFD: Binary (raw)
-  * followed by VInt length indicator, then raw data
- * 0xFE: reserved for future use
- * 0xFF: end-of-content marker (not used in content itself)
+* 0xE0: Long (variable length) ASCII text
+    * 2 LSB (0x03): reserved for future use
+    * NOTE: these values are NOT back-referencable, so they do not participate in back-reference resolution (indexes/tables not updated)
+* 0xE4: Long (variable length) Unicode text
+    * 2 LSB (0x03): reserved for future use
+    * NOTE: these values are NOT back-referencable, so they do not participate in back-reference resolution (indexes/tables not updated)
+* 0xE8: Binary, 7-bit encoded
+    * 2 LSB (0x03): reserved for future use
+    * followed by VInt length indicator, then data in 7/8 encoding (only 7 LSB of each byte used; 8 such bytes are used to encode 7 "raw" bytes)  
+* 0xEC: Shared String reference, long
+    * 2 LSB (0x03): used as 2 MSB of index
+    * followed by byte used as 8 LSB of index
+    * Resulting 10-bit index used as is; values 0-30 are not to be used (instead, short reference must be used)
+    * Back references are ONLY made to "short" and "tiny" Ascii/Unicode Strings, so generator and parser only need to retain references to these Strings and not "long" (aka variable length) Strings.
+* 0xF0 - 0xF7: not used, reserved for future use (NOTE: used in key mode)
+* 0xF8 - 0xFB: Structural markers
+    * 0xF8: START_ARRAY
+    * 0xF9: END_ARRAY
+    * 0xFA: START_OBJECT
+    * 0xFB: reserved in token mode (but is END_OBJECT in key mode) -- this just because object end marker comes as alternative to property name.
+* 0xFC: Used as end-of-String marker
+* 0xFD: Binary (raw)
+    * followed by VInt length indicator, then raw data
+* 0xFE: reserved for future use
+* 0xFF: end-of-content marker (not used in content itself)
 
-==== Tokens: key mode ====
+###  Tokens: key mode
 
 Key mode tokens are only used within JSON Object values; if so, they alternate between value tokens (first a key token; followed by either single-value value token or multi-token JSON Object/Array value). A single token denotes end of JSON Object value; all the other tokens are used for expressing JSON Object property name.
 
@@ -232,36 +229,36 @@ Most tokens are single byte: exceptions are 2-byte "long shared String" token, a
 
 Byte ranges are divides in 4 main sections (64 byte values each):
 
- * 0x00 - 0x3F: miscellaneous
-  * 0x00 - 0x1F: not used, reserved for future versions
-  * 0x20: Special constant name "" (empty String)
-  * 0x21 - 0x2F: reserved for future use (unused for now to reduce overlap between values)
-  * 0x30 - 0x33: "Long" shared key name reference (2 byte token); 2 LSBs of the first byte are used as 2 MSB of 10-bit reference (up to 1024) values to a shared name: second byte used for 8 LSB.
-   * Note: combined values of 0 through 64 are reserved, since there is more optimal representation -- encoder is not to produce such "short long" values; decoder should check that these are not encountered. Future format versions may choose to use these for specific use.
-  * 0x34: Long (not-yet-shared) Unicode name. Variable-length String; token byte is followed by 64 or more bytes, followed by end-of-String marker byte.
-   * Note: encoding of Strings shorter than 56 bytes should NOT be done using this type: if such sequence is detected it MAY be considered an error. Further, for ASCII names, Strings with length of 56-64 should also use short String notation
-  * 0x35 - 0x39: not used, reserved for future versions
-  * 0x3A: Not used; would be part of header sequence (which is NOT allowed in key mode!)
-  * 0x3B - 0x3F: not used, reserved for future versions
- * 0x40 - 0x7F: "Short" shared key name reference; names 0 through 63.
- * 0x80 - 0xBF: Short ASCII names
-  * 0x80 - 0xBF: names consisting of 1 - 64 bytes, all of which represent UTF-8 Ascii characters (MSB not set) -- special case to potentially allow faster decoding
- * 0xC0 - 0xF7: Short Unicode names
-  * 0xC0 - 0xF7: names consisting of 2 - 57 bytes that can potentially contain UTF-8 multi-byte sequences: encoders are NOT required to guarantee there is one, but for decoding efficiency reasons are recommended to check (that is: decoders on many platforms will be able to handle ASCII-sequences more efficiently than general UTF-8 names)
- * 0xF8 - 0xFA: reserved (avoid overlap with START/END_ARRAY, START_OBJECT)
- * 0xFB: END_OBJECT marker
- * 0xFC - 0xFF: reserved for framing, not used in key mode (used in value mode)
+* 0x00 - 0x3F: miscellaneous
+    * 0x00 - 0x1F: not used, reserved for future versions
+    * 0x20: Special constant name "" (empty String)
+    * 0x21 - 0x2F: reserved for future use (unused for now to reduce overlap between values)
+    * 0x30 - 0x33: "Long" shared key name reference (2 byte token); 2 LSBs of the first byte are used as 2 MSB of 10-bit reference (up to 1024) values to a shared name: second byte used for 8 LSB.
+        * Note: combined values of 0 through 64 are reserved, since there is more optimal representation -- encoder is not to produce such "short long" values; decoder should check that these are not encountered. Future format versions may choose to use these for specific use.
+    * 0x34: Long (not-yet-shared) Unicode name. Variable-length String; token byte is followed by 64 or more bytes, followed by end-of-String marker byte.
+        * Note: encoding of Strings shorter than 56 bytes should NOT be done using this type: if such sequence is detected it MAY be considered an error. Further, for ASCII names, Strings with length of 56-64 should also use short String notation
+    * 0x35 - 0x39: not used, reserved for future versions
+    * 0x3A: Not used; would be part of header sequence (which is NOT allowed in key mode!)
+    * 0x3B - 0x3F: not used, reserved for future versions
+* 0x40 - 0x7F: "Short" shared key name reference; names 0 through 63.
+* 0x80 - 0xBF: Short ASCII names
+    * 0x80 - 0xBF: names consisting of 1 - 64 bytes, all of which represent UTF-8 Ascii characters (MSB not set) -- special case to potentially allow faster decoding
+* 0xC0 - 0xF7: Short Unicode names
+    * 0xC0 - 0xF7: names consisting of 2 - 57 bytes that can potentially contain UTF-8 multi-byte sequences: encoders are NOT required to guarantee there is one, but for decoding efficiency reasons are recommended to check (that is: decoders on many platforms will be able to handle ASCII-sequences more efficiently than general UTF-8 names)
+* 0xF8 - 0xFA: reserved (avoid overlap with START/END_ARRAY, START_OBJECT)
+* 0xFB: END_OBJECT marker
+* 0xFC - 0xFF: reserved for framing, not used in key mode (used in value mode)
 
-=== Resolved Shared String references ===
+#### Resolved Shared String references
 
 Shared Strings refer to already encoded/decoded key names or value strings. The method used for indicating which of "already seen" String values to use is designed to allow for:
 
- * Efficient encoding AND decoding (without necessarily favoring either)
- * To allow keeping only limited amount of buffering (of already handled names) by both encoder and decoder; this is especially beneficial to avoid unnecessary overhead for cases where there are few back references (mostly or completely unique values)
+* Efficient encoding AND decoding (without necessarily favoring either)
+* To allow keeping only limited amount of buffering (of already handled names) by both encoder and decoder; this is especially beneficial to avoid unnecessary overhead for cases where there are few back references (mostly or completely unique values)
 
 Mechanism for resolving value string references differs from that used for key name references, so two are explained separately below.
 
-==== Shared value Strings ====
+#### Shared value Strings
 
 Support for shared value Strings is optional, in that generator can choose to either check for shareable value Strings or omit the checks.
 Format header will indicate which option generator chose: if header is missing, default value of "false" (no checks done for shared value Strings; no back-references exist in encoded content) must be assumed.
@@ -279,7 +276,7 @@ Any shared string value references are resolved against this buffer.
 
 Note: when a shared String is written or parsed, no entry is added to the shared value buffer (since one must already be in it)
 
-==== Shared key name Strings ====
+#### Shared key name Strings
 
 Support for shared property names is optional, in that generator can choose to either check for shareable property names or omit the checks.
 Format header will indicate which option generator chose: if header is missing, default value of "trues" (checking done for shared property names is made, and encoded content MAY contain back-references to share names) must be assumed.
@@ -288,26 +285,26 @@ Shared key resolution is done same way as shared String value resolution, but bu
 
 -----
 
-=== Future improvement ideas ===
+## Future improvement ideas
 
 '''NOTE''': version 1.0 will '''NOT''' support any of features presented in this section; they are documented as ideas for future work.
 
-==== In-frame compression? ====
+### In-frame compression?
 
 Although there were initial plans to allow in-frame (in-content) compression for individual values, it was decided that support would not be added for initial version, mostly since it was felt that compression of the whole document typically yields better results. For some use cases this may not be true, however; especially when semi-random access is desired.
 
 Since enough type bits were left reserved for binary and long-text types, support may be added for future versions.
 
-==== Longer length-prefixed data? ====
+### Longer length-prefixed data?
 
 Given that encoders may be able to determine byte-length for value strings longer than 64 bytes (current limit for "short" strings), it might make sense to add value types with 2-byte prefix (or maybe just 1-byte prefix and additional length information after first fixed 64 bytes, since that allows output at constant location. Performance measurements should be made to ensure that such an option would improve performance as that would be main expected benefit.
 
-==== Pre-defined shared values (back-refs) ====
+### Pre-defined shared values (back-refs)
 
 For messages with little redundancy, but small set of always used names (from schema), it would be possible to do something similar to what deflate/gzip allows: defining "pre-amble", to allow back-references to pre-defined set of names and text values.
 For example, it would be possible to specify 64 names and/or shared string values for both serializer and deserializer to allow back-references to this pre-defined set of names and/or string values. This would both improve performance and reduce size of content.
 
-==== Filler value(s) ====
+### Filler value(s)
 
 It might make sense to allocate a "no-op" value or values to allow for padding of messages.
 This would be useful for things like:
@@ -317,7 +314,7 @@ This would be useful for things like:
 
 This would be a simple addition.
 
-==== Chunked values ====
+### Chunked values
 
 (note: inspiration for this came from [[https://tools.ietf.org/html/rfc7049 | CBOR]] format)
 
@@ -329,25 +326,16 @@ more efficient and flexible decoding.
 
 -----
 
-=== Appendix A: External definitions ===
+### Appendix A: External definitions
 
-==== ZigZag encoding for VInts ====
+#### ZigZag encoding for VInts
 
 Smile uses {{{ZigZag}}} encoding (defined for [[http://code.google.com/apis/protocolbuffers/docs/encoding.html | protobuf format]], see [[http://stackoverflow.com/questions/2210923/zig-zag-decoding | this example]]),
 which is a variant of generic [[http://en.wikipedia.org/wiki/Variable-length_quantity | VInts]] (Variable-length INTegers).
 
 Encoding is done logically as a two-step process:
 
- 1. Use {{{ZigZag}}} encoding to convert signed values to unsigned values: essentially this will "move the sign bit" as the LSB.
- 2. Encode remaining bits of unsigned integral number, starting with the most significant bits: the last byte is indicated by setting the sign bit; all the other bytes have sign bit clear.
-   * Last byte has only 6 data bits; second-highest bit MUST be clear (to ensure that value 0xFF is never used for encoding; values 0xC0 - 0xFF are not used for the last byte).
-   * Other bytes have 7 data bits.
-
-=== Appendix B: encoder/decoder implementations ===
-
-Following implementations are known for Smile format:
-
- * [[https://github.com/FasterXML/jackson-dataformat-smile | Jackson]] (JSON)
- * [[https://github.com/dakrone/cheshire | Cheshire]] (Clojure)
- * [[https://github.com/pierre/libsmile | libsmile]] (C, wrappers for Ruby, Perl)
- * [[https://github.com/jhosmer/PySmile | PySmile]] (Python)
+1. Use {{{ZigZag}}} encoding to convert signed values to unsigned values: essentially this will "move the sign bit" as the LSB.
+2. Encode remaining bits of unsigned integral number, starting with the most significant bits: the last byte is indicated by setting the sign bit; all the other bytes have sign bit clear.
+    * Last byte has only 6 data bits; second-highest bit MUST be clear (to ensure that value 0xFF is never used for encoding; values 0xC0 - 0xFF are not used for the last byte).
+    * Other bytes have 7 data bits.
