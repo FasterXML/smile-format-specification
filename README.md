@@ -42,5 +42,6 @@ Smile Codecs
 Frameworks, Systems that use Smile codec (encoder and decoder)
 
 * [Elastic Search](http://www.elastic.co) uses Smile as transport format supports access using Smile encoding.
+* [Apache Solr](http://lucene.apache.org/solr) can use Smile as the response format with the `wt=smile` parameter.
 
 
