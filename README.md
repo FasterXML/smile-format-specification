@@ -4,7 +4,8 @@
 [JSON](http://en.wikipedia.org/wiki/JSON) data format.
 
 Format was specified in 2010 by [Jackson](../../../jackson) JSON processor development team.
-First compliant implementation was included Jackson version 1.6, released in September 2010.
+First compliant implementation was included as a Jackson backend for Jackson version 1.6,
+released in September 2010.
 
 ##  Specification
 
@@ -19,7 +20,7 @@ Design documentation includes:
 
 ## Documentation
 
-* [SmileFAQ](smile-faw.md)
+* [SmileFAQ](smile-faq.md)
 
 ## Implementations
 
