@@ -21,6 +21,7 @@ Design documentation includes:
 ## Documentation
 
 * [SmileFAQ](smile-faq.md)
+* [Smile Wikipedia entry](https://en.wikipedia.org/wiki/Smile_(data_interchange_format))
 
 ## Implementations
 
@@ -29,6 +30,7 @@ Smile Codecs
 * Java
     * [Jackson](../../../jackson) provides Smile support through [jackson-dataformat-smile](../../../jackson-dataformats-binary) modules) format codec
         * Full support: including streaming access, data binding and tree model (100% parity with textual JSON)
+        * *NEW* (2017) [Jackson 2.9](https://github.com/FasterXML/jackson/wiki/Jackson-Release-2.9) added "non-blocking" ((aka "asynchronous") decoding for JSON and Smile format backends
     * [Protostuff](http://github.com/protostuff/protostuff) project supports Smile both as a low-level data format, and as format used for its RPC implementation
 * JVM, other:
     * [Clojure](http://clojure.org) 
