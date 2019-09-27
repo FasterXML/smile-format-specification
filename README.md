@@ -22,6 +22,8 @@ Design documentation includes:
 
 * [SmileFAQ](smile-faq.md)
 * [Smile Wikipedia entry](https://en.wikipedia.org/wiki/Smile_(data_interchange_format))
+* User documentation:
+    * [Understanding Smile data format](https://medium.com/code-with-ayush/understanding-smile-a-data-format-based-on-json-29972a37d376)
 
 ## Implementations
 
