@@ -330,8 +330,8 @@ more efficient and flexible decoding.
 
 #### ZigZag encoding for VInts
 
-Smile uses `ZigZag` encoding (defined for [protobuf format](http://code.google.com/apis/protocolbuffers/docs/encoding.html],
-(see [StackOverflow question]([http://stackoverflow.com/questions/2210923/zig-zag-decoding) for example)
+Smile uses `ZigZag` encoding (defined for [protobuf format](http://code.google.com/apis/protocolbuffers/docs/encoding.html),
+(see [StackOverflow question](http://stackoverflow.com/questions/2210923/zig-zag-decoding) for example)
 which is a variant of generic [VInts](http://en.wikipedia.org/wiki/Variable-length_quantity) (Variable-length INTegers).
 
 Encoding is done logically as a two-step process:
