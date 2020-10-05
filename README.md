@@ -38,7 +38,7 @@ Smile Codecs
     * [Clojure](http://clojure.org) 
         * [Cheshire](https://github.com/dakrone/cheshire) library offers support via Jackson `jackson-dataformat-smile`
 * C
-    * [libsmile](https://github.com/brianm/libsmile) is a small C-library for reading and writing Smile data.
+    * [libsmile](https://github.com/pierre/libsmile) is a small C-library for reading and writing Smile data.
 * Javascript
     * [smile-js](https://github.com/ngyewch/smile-js) Smile decoder written in Javascript
 * Python
