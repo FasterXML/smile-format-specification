@@ -140,9 +140,9 @@ Prefix: 0x20; covers byte values 0x20 - 0x3F, although not all values are used
    * 0x22 / 0x23: false / true
   * Numbers:
    * 0x24 - 0x27 Integral numbers; 2 {{{LSB}}} (0x03) contain subtype
-    * 0x0 - 32-bit integer; zigzag encoded, 1 - 5 data bytes
-    * 0x1 - 64-bit integer; zigzag encoded, 5 - 10 data bytes
-    * 0x2 - {{{BigInteger}}}
+     * 0x0 - 32-bit integer; zigzag encoded, 1 - 5 data bytes
+     * 0x1 - 64-bit integer; zigzag encoded, 5 - 10 data bytes
+     * 0x2 - {{{BigInteger}}}
      * Encoded as token indicator followed by 7-bit escaped binary (with Unsigned VInt (no-zigzag encoding) as length indicator) that represent magnitude value (byte array)
     * 0x3 - reserved for future use
    * 0x28 - 0x2B floating point numbers
