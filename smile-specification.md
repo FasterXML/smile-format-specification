@@ -12,26 +12,27 @@ This page covers current data format specification; which is planned to eventual
 
 ### Version history
 
- * Current: 1.0.4 (12-May-2013)
- * First official: 1.0.0 (12-Sep-2010)
- * First draft: (24-Jun-2010)
+* Current: 1.0.4 (12-May-2013)
+* First official: 1.0.0 (12-Sep-2010)
+* First draft: (24-Jun-2010)
 
 ### Update history
 
- * 2016-02-23: Minor clarification on acceptable lengths for long non-shared names (different minimum for ascii, non-ascii)
- * 2015-12-10: Add Appendix B, list of known implementations
- * 2014-05-21: Fixed a typo: end-of-string marker is `0xFC` and NOT `0xFE` as stated in one place.
- * 2014-03-28: Added improvement ideas for possible chunked variants of binary data, Strings.
- * 2013-05-12: Important document fix: value codes 0xE8 and 0xEC were mixed in document (Java and C codecs implement correctly) -- bumped version to 1.0.4 to signify this clarification. (big thanks to `gbooker@github` for pointing out this discrepancy)
- * 2013-03-06: Fixed a minor flaw in description of Zigzag encoding (multiply by two, not one)
- * 2012-02-21: Added description of zigzag-encoding for VInts
- * 2011-11-29: Clarified that values 0xF0 - 0xF7 are "reserved for future use" in value mode (but used in key mode)
- * 2011-07-27: Fixed 2 erroneous references to "5 MSB" which should be "5 LSB" (thanks Pierre!)
- * 2011-07-15: Formatting improvements; add a note about recommended MIME Type for Smile encoded data
- * 2011-02-16: Fix a minor typo in section 2.3 ("Short Unicode names"); range 0xF8 - 0xFE is NOT used for encoding
- * 2010-09-12: Mark as 1.0.0; add some future plan notes.
- * 2010-08-26: Rearrange token byte values to make better use of 0xF8 - 0xFF area for framing.
- * 2010-08-20: Remove references to initially planned in-frame compression; add one more header flag, extend version info to 4 bits
+* 2020-10-24: Minor clarification on encoding of 32-bit IEEE floating point value
+* 2016-02-23: Minor clarification on acceptable lengths for long non-shared names (different minimum for ascii, non-ascii)
+* 2015-12-10: Add Appendix B, list of known implementations
+* 2014-05-21: Fixed a typo: end-of-string marker is `0xFC` and NOT `0xFE` as stated in one place.
+* 2014-03-28: Added improvement ideas for possible chunked variants of binary data, Strings.
+* 2013-05-12: Important document fix: value codes 0xE8 and 0xEC were mixed in document (Java and C codecs implement correctly) -- bumped version to 1.0.4 to signify this clarification. (big thanks to `gbooker@github` for pointing out this discrepancy)
+* 2013-03-06: Fixed a minor flaw in description of Zigzag encoding (multiply by two, not one)
+* 2012-02-21: Added description of zigzag-encoding for VInts
+* 2011-11-29: Clarified that values 0xF0 - 0xF7 are "reserved for future use" in value mode (but used in key mode)
+* 2011-07-27: Fixed 2 erroneous references to "5 MSB" which should be "5 LSB" (thanks Pierre!)
+* 2011-07-15: Formatting improvements; add a note about recommended MIME Type for Smile encoded data
+* 2011-02-16: Fix a minor typo in section 2.3 ("Short Unicode names"); range 0xF8 - 0xFE is NOT used for encoding
+* 2010-09-12: Mark as 1.0.0; add some future plan notes.
+* 2010-08-26: Rearrange token byte values to make better use of 0xF8 - 0xFF area for framing.
+* 2010-08-20: Remove references to initially planned in-frame compression; add one more header flag, extend version info to 4 bits
 
 ## External Considerations
 
