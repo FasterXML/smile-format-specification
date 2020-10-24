@@ -103,8 +103,7 @@ Some general notes on tokens:
     * All length indicators define _actual_ length of data; not possibly encoded length (in case of "safe" encoding, encoded data is longer, and that length can be calculated from payload data length)
 * Floating point values (IEEE 32 and 64-bit) are encoded using fixed-length big-endian encoding (7 bits used to avoid use of reserved bytes like 0xFF):
     * Data is "right-aligned", meaning padding is prepended to the first byte (and its MSB).
-    * For example, the 32-bit float 29.9510 is encoded as 0x26 0x37 0x3E 0x0F 0x04. We get to this encoding by taking the IEEE 764 32-bit binary representation of the number 29.9510, (1) writing the least-significant 7 bits, (2) right-shitfing 7 bits, and repeating the process until encoding the entire bit-string (5 times for a 32-bit float). As a result, 0x26 = 29.9510 & 0x7F, 0x37 = (29.9510 >> 7) & 0x7F, 0x3E = (29.9510 >> 14) & 0x7F, 0x0F = (29.9510 >> 21) & 0x7F, and 0x04 = (29.9510 >> 28) & 0x7F.
-
+    * For example, the 32-bit float `29.9510 is` encoded as `0x26 0x37 0x3E 0x0F 0x04.` We get to this encoding by taking the IEEE 764 32-bit binary representation of the number 29.9510, (1) writing the least-significant 7 bits, (2) right-shifting 7 bits, and repeating the process until encoding the entire bit-string (5 times for a 32-bit float). As a result, 0x26 = 29.9510 & 0x7F, 0x37 = (29.9510 >> 7) & 0x7F, 0x3E = (29.9510 >> 14) & 0x7F, 0x0F = (29.9510 >> 21) & 0x7F, and 0x04 = (29.9510 >> 28) & 0x7F.
 * "Big" decimal/integer values use "safe" binary encoding
 * "Safe" binary encoding simply uses 7 LSB: data is left aligned (i.e. any padding of the last byte is in its rightmost, least-significant, bits).
 
