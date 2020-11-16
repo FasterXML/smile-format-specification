@@ -118,8 +118,8 @@ Conceptually tokens are divided in 8 classes, class defined by 3 MSB of the firs
 * 0x20 - 0x3F: Simple literals, numbers
 * 0x40 - 0x5F: Tiny ASCII (1 - 32 bytes == chars)
 * 0x60 - 0x7F: Short ASCII (33 - 64 bytes == chars)
-* 0x80 - 0x9F: Tiny Unicode (2 - 33 bytes; <= 33 characters)
-* 0xA0 - 0xBF: Short Unicode (34 - 64 bytes; <= 64 characters)
+* 0x80 - 0x9F: Tiny Unicode (2 - 32 bytes; <= 32 characters)
+* 0xA0 - 0xBF: Short Unicode (33 - 64 bytes; <= 64 characters)
 * 0xC0 - 0xDF: Small integers (single byte)
 * 0xE0 - 0xFF: Binary / Long text / structure markers (0xF0 - 0xF7 is unused, reserved for future use -- but note, used in key mode)
 
@@ -177,10 +177,10 @@ Prefixes: 0x80  / 0xA0; covers all byte values between 0x80 and 0xBF; except tha
 
 * 0x80 - 0x9F
     * String with specified length; bytes NOT guaranteed to be in ASCII range
-    * 5 LSB used to indicate _byte_ lengths from 2 to 33 (with character length possibly less due to multi-byte characters)
+    * 5 LSB used to indicate _byte_ lengths from 2 to 32 (with character length possibly less due to multi-byte characters)
     * Length 1 can not be expressed, since only ASCII characters have single byte encoding (which means it should be encoded with "Tiny ASCII")
 * 0xA0 - 0xBF
-    * 5 LSB used to indicate _byte_ lengths from 34 to 65 (with character length possibly less due to multi-byte characters)
+    * 5 LSB used to indicate _byte_ lengths from 33 to 65 (with character length possibly less due to multi-byte characters)
 
 #### Token class: Small integers
 
