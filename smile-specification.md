@@ -160,18 +160,18 @@ Prefix: 0x20; covers byte values 0x20 - 0x3F, although not all values are used
 
 Rest of the possible values are reserved for future use and not used currently.
 
-#### Token classes: Tiny ASCII, Small ASCII
+#### Token classes: Tiny ASCII, Short ASCII
 
 Prefixes: 0x40  / 0x60; covers all byte values between 0x40 and 0x7F.
 
  * 0x40 - 0x5F: Tiny ASCII
   * String with specified length; all bytes in ASCII range.
   * 5 LSB used to indicate lengths from 1 to 32 (bytes == chars)
- * 0x60 - 0x7F: Small ASCII
+ * 0x60 - 0x7F: Short ASCII
   * String with specified length; all bytes in ASCII range
   * 5 LSB used to indicate lengths from 33 to 64 (bytes == chars)
 
-#### Token classes: Tiny Unicode, Small Unicode
+#### Token classes: Tiny Unicode, Short Unicode
 
 Prefixes: 0x80  / 0xA0; covers all byte values between 0x80 and 0xBF; except that 0x80 is not encodable (since there is no 1 byte long multi-byte-character String)
 
