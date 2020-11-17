@@ -4,7 +4,7 @@
 Its logical data model is same as that of JSON, so it can be considered a "Binary JSON" format.
 
 For design on "Project Smile", which implements support for this format, see
-[Smile format Design goals])smile-design-goals.md).
+[Smile format Design goals](smile-design-goals.md).
 
 This page covers current data format specification; which is planned to eventually be standardized through a format process (most likely as IETF RFC).
 
@@ -21,7 +21,6 @@ This page covers current data format specification; which is planned to eventual
 * 2020-11-16: Replacing accidental "Small ASCII" and "Small Unicode" references to canonical "Short ASCII" and "Short Unicode" (contributed by @jviotti)
 * 2020-10-24: Minor clarification on encoding of 32-bit IEEE floating point value
 * 2016-02-23: Minor clarification on acceptable lengths for long non-shared names (different minimum for ascii, non-ascii)
-* 2015-12-10: Add Appendix B, list of known implementations
 * 2014-05-21: Fixed a typo: end-of-string marker is `0xFC` and NOT `0xFE` as stated in one place.
 * 2014-03-28: Added improvement ideas for possible chunked variants of binary data, Strings.
 * 2013-05-12: Important document fix: value codes 0xE8 and 0xEC were mixed in document (Java and C codecs implement correctly) -- bumped version to 1.0.4 to signify this clarification. (big thanks to `gbooker@github` for pointing out this discrepancy)
