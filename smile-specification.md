@@ -18,6 +18,7 @@ This page covers current data format specification; which is planned to eventual
 
 ### Update history
 
+* 2020-11-16: Replacing accidental "Small ASCII" and "Small Unicode" references to canonical "Short ASCII" and "Short Unicode" (contributed by @jviotti)
 * 2020-10-24: Minor clarification on encoding of 32-bit IEEE floating point value
 * 2016-02-23: Minor clarification on acceptable lengths for long non-shared names (different minimum for ascii, non-ascii)
 * 2015-12-10: Add Appendix B, list of known implementations
