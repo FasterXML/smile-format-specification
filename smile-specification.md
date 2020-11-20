@@ -164,12 +164,14 @@ Rest of the possible values are reserved for future use and not used currently.
 
 Prefixes: 0x40  / 0x60; covers all byte values between 0x40 and 0x7F.
 
- * 0x40 - 0x5F: Tiny ASCII
-  * String with specified length; all bytes in ASCII range.
-  * 5 LSB used to indicate lengths from 1 to 32 (bytes == chars)
- * 0x60 - 0x7F: Short ASCII
-  * String with specified length; all bytes in ASCII range
-  * 5 LSB used to indicate lengths from 33 to 64 (bytes == chars)
+* 0x40 - 0x5F: Tiny ASCII
+    * String with specified length; all bytes in ASCII range.
+    * 5 LSB used to indicate lengths from 1 to 32 (bytes == chars)
+    * **Note**: The character-length-length of the ASCII string is therefore what the 5 LSB encodes + 1
+* 0x60 - 0x7F: Short ASCII
+    * String with specified length; all bytes in ASCII range
+    * 5 LSB used to indicate lengths from 33 to 64 (bytes == chars)
+    * **Note**: The character-length of the ASCII string is therefore what the 5 LSB encodes + 33
 
 #### Token classes: Tiny Unicode, Short Unicode
 
@@ -179,8 +181,10 @@ Prefixes: 0x80  / 0xA0; covers all byte values between 0x80 and 0xBF; except tha
     * String with specified length; bytes NOT guaranteed to be in ASCII range
     * 5 LSB used to indicate _byte_ lengths from 2 to 33 (with character length possibly less due to multi-byte characters)
     * Length 1 can not be expressed, since only ASCII characters have single byte encoding (which means it should be encoded with "Tiny ASCII")
+    * **Note**: The byte-length of the UTF-8 string is therefore what the 5 LSB encodes + 2 (different from the "Tiny ASCII" encoding)
 * 0xA0 - 0xBF
     * 5 LSB used to indicate _byte_ lengths from 34 to 65 (with character length possibly less due to multi-byte characters)
+    * **Note**: The byte-length of the UTF-8 string is therefore what the 5 LSB encodes + 34 (different from the "Short ASCII" encoding)
 
 #### Token class: Small integers
 
