@@ -7,7 +7,7 @@ Work started in 2010, and an initial version was completed by the same year, as 
 generator implementation as part of Jackson 1.6 release.
 
 This document covers design rationale for the data format; format itself is explained on
-[Smile Format specification](smile-format-specification.md)
+[Smile Format specification](smile-specification.md)
 
 ## 0. Background
 
