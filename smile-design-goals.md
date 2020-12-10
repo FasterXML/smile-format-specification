@@ -29,10 +29,8 @@ Design goals for the desired format are:
   * Aimed to allow chunked content output
  * SHOULD allow proper streaming: that is, amount of required buffering can not exceed some fixed constant, size of which is related to low-level buffering, not to length of content to encoded. Note, however, that in cases where Jackson API itself imposes limits (case for embedded binary data; as well as for String values to output), implementation can make use of this existing limitation
   * This specifically prevents pervasive use of length-prefix for Strings: to know byte-length of a Java String, one would need to either do additional passes (first to calculate length, second to encode), or to buffer encoded output in memory.
-* SHOULD be usable with [[http://en.wikipedia.org/wiki/Web_socket | WebSockets]] to degree feasible
-  * Means that effort should be made to avoid use of byte 0xFF (end marker) -- for some content (binary data), it may be necessary to introduce separate "safe" (or "framing"?) mode to use additional escaping?
-  * Perhaps there should be a way to use String-encoding for numbers to allow for "Web Sockets safe" mode?
-* SHOULD support simple framing -- ability to separate binary-encoded content segments from each other AND efficiently scan to find these boundaries _without_ having to parse/decode contents. Framing is easy to do with textual JSON by using something as simple as linefeed, since linefeeds are always quoted in String values, as long as no indentation is used.
+* SHOULD support simple framing through the use of byte 0xFF (end marker) -- ability to separate binary-encoded content segments from each other AND efficiently scan to find these boundaries _without_ having to parse/decode contents. Framing is easy to do with textual JSON by using something as simple as linefeed, since linefeeds are always quoted in String values, as long as no indentation is used.
+  * Means that effort should be made to avoid use of end marker byte when encoding content
 
 ## 2. Non-goals
 
