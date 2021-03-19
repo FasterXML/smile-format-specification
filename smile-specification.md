@@ -18,7 +18,7 @@ This page covers current data format specification; which is planned to eventual
 
 ### Update history
 
-* 2021-03-18: Minor markup fixes
+* 2021-03-18: Minor markup fixes, clarification to "simple literals, numbers" section
 * 2020-11-19: Added notes on length indicatos for "Tiny" and "Short" String values (ASCII and Unicode) (contributed by @jviotti)
 * 2020-11-16: Replacing accidental "Small ASCII" and "Small Unicode" references to canonical "Short ASCII" and "Short Unicode" (contributed by @jviotti)
 * 2020-10-24: Minor clarification on encoding of 32-bit IEEE floating point value
@@ -144,17 +144,17 @@ Prefix: 0x20; covers byte values 0x20 - 0x3F, although not all values are used
     * 0x22 / 0x23: false / true
 * Numbers:
     * 0x24 - 0x27 Integral numbers; 2 LSB (0x03) contain subtype
-        * 0x0 - 32-bit integer; zigzag encoded, 1 - 5 data bytes
-        * 0x1 - 64-bit integer; zigzag encoded, 5 - 10 data bytes
-        * 0x2 - `BigInteger`
+        * 0x24 - 32-bit integer; zigzag encoded, 1 - 5 data bytes
+        * 0x25 - 64-bit integer; zigzag encoded, 5 - 10 data bytes
+        * 0x26 - `BigInteger`
             * Encoded as token indicator followed by 7-bit escaped binary (with Unsigned VInt (no-zigzag encoding) as length indicator) that represent magnitude value (byte array)
-       * 0x3 - reserved for future use
+       * 0x27 - reserved for future use
     * 0x28 - 0x2B floating point numbers; 2 LSB (0x03) contain subtype
-        * 0x00: 32-bit float
-        * 0x01: 64-bit double
-        * 0x02: `BigDecimal`
+        * 0x28: 32-bit float
+        * 0x29: 64-bit double
+        * 0x2A: `BigDecimal`
             * Encoded as token indicator followed by zigzag encoded scale (32-bit), followed by 7-bit escaped binary (with Unsigned VInt (no-zigzag encoding) as length indicator) that represent magnitude value (byte array) of integral part.
-       * 0x3 - reserved for future use
+       * 0x2B - reserved for future use
 * Reserved for future use, avoided (decoding error if found)
     * 0x2C - 0x2F reserved for future use (non-overlapping with keys)
     * 0x30 - 0x3F overlapping with key mode and/or header (0x3A)
