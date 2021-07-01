@@ -17,20 +17,20 @@ One of opportunities for improving both space- and time efficiency of data trans
 
 Design goals for the desired format are:
 
- * MUST support all logical JSON events; should not add extensions beyond what existing Jackson API offers.
- * SHOULD be reasonably space-efficient (compact); to reduce "fluff"; especially to degree this can help processing efficiency.
- * SHOULD be both efficient to read (deserialize) AND write (serialize): many binary formats make significant sacrifices in write speed.
- * SHOULD avoid overly complex structures and algorithms
- * SHOULD avoid fragility:
-  * Keep enough redundancy to allow for some self-consistency checks; specifically, there should be byte sequences that are invalid, to make detection of invalid content possible.
-  * Add explicit format version number (nothing drastic, even a nibble will do)
- * MUST support auto-detection: Use a unique header ("magic cookie")
- * SHOULD allow simple concatenation of content; that is, concatenation of valid properly nested sequences (that is, no open start object or start array markers) must be legal format in itself
-  * Aimed to allow chunked content output
- * SHOULD allow proper streaming: that is, amount of required buffering can not exceed some fixed constant, size of which is related to low-level buffering, not to length of content to encoded. Note, however, that in cases where Jackson API itself imposes limits (case for embedded binary data; as well as for String values to output), implementation can make use of this existing limitation
-  * This specifically prevents pervasive use of length-prefix for Strings: to know byte-length of a Java String, one would need to either do additional passes (first to calculate length, second to encode), or to buffer encoded output in memory.
+* MUST support all logical JSON events; should not add extensions beyond what existing Jackson API offers.
+* SHOULD be reasonably space-efficient (compact); to reduce "fluff"; especially to degree this can help processing efficiency.
+* SHOULD be both efficient to read (deserialize) AND write (serialize): many binary formats make significant sacrifices in write speed.
+* SHOULD avoid overly complex structures and algorithms
+* SHOULD avoid fragility:
+    * Keep enough redundancy to allow for some self-consistency checks; specifically, there should be byte sequences that are invalid, to make detection of invalid content possible.
+    * Add explicit format version number (nothing drastic, even a nibble will do)
+* MUST support auto-detection: Use a unique header ("magic cookie")
+* SHOULD allow simple concatenation of content; that is, concatenation of valid properly nested sequences (that is, no open start object or start array markers) must be legal format in itself
+    * Aimed to allow chunked content output
+* SHOULD allow proper streaming: that is, amount of required buffering can not exceed some fixed constant, size of which is related to low-level buffering, not to length of content to encoded. Note, however, that in cases where Jackson API itself imposes limits (case for embedded binary data; as well as for String values to output), implementation can make use of this existing limitation
+    * This specifically prevents pervasive use of length-prefix for Strings: to know byte-length of a Java String, one would need to either do additional passes (first to calculate length, second to encode), or to buffer encoded output in memory.
 * SHOULD support simple framing through the use of byte 0xFF (end marker) -- ability to separate binary-encoded content segments from each other AND efficiently scan to find these boundaries _without_ having to parse/decode contents. Framing is easy to do with textual JSON by using something as simple as linefeed, since linefeeds are always quoted in String values, as long as no indentation is used.
-  * Means that effort should be made to avoid use of end marker byte when encoding content
+    * Means that effort should be made to avoid use of end marker byte when encoding content
 
 ## 2. Non-goals
 
