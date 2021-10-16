@@ -45,6 +45,8 @@ Smile Codecs
     * [smile-js](https://github.com/ngyewch/smile-js) Smile decoder written in Javascript
 * Python
     * [PySmile](https://github.com/jhosmer/PySmile) Python codec
+ * Rust
+    * [serde-smile](https://github.com/sfackler/serde-smile) Serde serializer and deserializer written in Rust.
 
 Frameworks, Systems that use Smile codec (encoder and decoder)
 
