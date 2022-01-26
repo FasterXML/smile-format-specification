@@ -12,12 +12,15 @@ This page covers current data format specification; which is planned to eventual
 
 ### Version history
 
-* Current: 1.0.4 (12-May-2013)
+* Current: 1.0.5 (26-Jan-2022)
+     * Previous: 1.0.4 (12-May-2013)
 * First official: 1.0.0 (12-Sep-2010)
 * First draft: (24-Jun-2010)
 
 ### Update history
 
+* 2022-01-26: Import fix to encoding of 7-bit encoded (safe) binary, wrt padding of the last byte.
+     * Version 1.0.4 -> 1.0.5
 * 2021-03-18: Minor markup fixes, clarification to "simple literals, numbers" section
 * 2020-11-19: Added notes on length indicatos for "Tiny" and "Short" String values (ASCII and Unicode) (contributed by @jviotti)
 * 2020-11-16: Replacing accidental "Small ASCII" and "Small Unicode" references to canonical "Short ASCII" and "Short Unicode" (contributed by @jviotti)
@@ -108,7 +111,10 @@ Some general notes on tokens:
     * Data is "right-aligned", meaning padding is prepended to the first byte (and its MSB).
     * For example, the 32-bit float `29.9510 is` encoded as `0x26 0x37 0x3E 0x0F 0x04.` We get to this encoding by taking the IEEE 764 32-bit binary representation of the number 29.9510, (1) writing the least-significant 7 bits, (2) right-shifting 7 bits, and repeating the process until encoding the entire bit-string (5 times for a 32-bit float). As a result, 0x26 = 29.9510 & 0x7F, 0x37 = (29.9510 >> 7) & 0x7F, 0x3E = (29.9510 >> 14) & 0x7F, 0x0F = (29.9510 >> 21) & 0x7F, and 0x04 = (29.9510 >> 28) & 0x7F.
 * "Big" decimal/integer values use "safe" binary encoding
-* "Safe" binary encoding simply uses 7 LSB: data is left aligned (i.e. any padding of the last byte is in its rightmost, least-significant, bits).
+* "Safe" binary encoding simply uses 7 LSB (sign bit, MSB, is left as 0).
+    * The last encoded byte contains 1 - 7 bits: if less than 7, data is "right-aligned", contained in Least-Significant Bits; there will be 0-6 MSB padding bits.
+    * For example: when encoding 4 bytes (32 bits), the first full (7-bit) encoded bytes (`0vvvvvvv`) are followed by an incomplete byte containing 4 value bits: `0000vvvv`.
+    * NOTE: before version 1.0.5 above statemet claimed incorrect alignment (claiming padding would be for LSB)
 
 ### Tokens: value mode
 
@@ -210,7 +216,9 @@ This class is further divided in 8 sub-section, using value of bits #2, #3 and #
     * NOTE: these values are NOT back-referencable, so they do not participate in back-reference resolution (indexes/tables not updated)
 * 0xE8: Binary, 7-bit encoded
     * 2 LSB (0x03): reserved for future use
-    * followed by VInt length indicator, then data in 7/8 encoding (only 7 LSB of each byte used; 8 such bytes are used to encode 7 "raw" bytes)  
+    * followed by VInt length indicator, then data in 7/8 encoding (only 7 LSB of each byte used [sign bit always 0]; 8 such bytes are used to encode 7 "raw" bytes)
+	* Due to alignment the last byte may contain fewer than 7 bits: if so, the LSB bits contain data and up to 7 MSB may be left as 0 (the highest bit, sign bit, is always 0).
+	* NOTE: before version 1.0.5, some documentation suggested padding would be for LSB -- this is NOT the case.
 * 0xEC: Shared String reference, long
     * 2 LSB (0x03): used as 2 MSB of index
     * followed by byte used as 8 LSB of index
