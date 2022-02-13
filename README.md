@@ -53,4 +53,9 @@ Frameworks, Systems that use Smile codec (encoder and decoder)
 * [Elastic Search](http://www.elastic.co) uses Smile as transport format supports access using Smile encoding.
 * [Apache Solr](http://lucene.apache.org/solr) can use Smile as the response format with the `wt=smile` parameter.
 
+## Related Publications
 
+Here are some external articles, blog posts, research papers that may be of interest:
+
+* [A Survey of JSON-compatible Binary Serialization Specifications](https://arxiv.org/abs/2201.02089)
+* [A Benchmark of JSON-compatible Binary Serialization Specifications](https://arxiv.org/abs/2201.03051)
