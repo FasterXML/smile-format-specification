@@ -19,6 +19,7 @@ This page covers current data format specification; which is planned to eventual
 
 ### Update history
 
+* 2022-02-20: Clarify handling of "unused" bits (see issue #17) primarily regarding encoding of floating-point numbers, but more generally for all unused bits.
 * 2022-01-26: Import fix to encoding of 7-bit encoded (safe) binary, wrt padding of the last byte.
      * Version 1.0.4 -> 1.0.5
 * 2021-03-18: Minor markup fixes, clarification to "simple literals, numbers" section
@@ -94,6 +95,11 @@ Use of certain byte values is limited:
 
 Some general notes on tokens:
 
+* (2022-02-20) Unused bits in encoded bytes:
+     * SHOULD be encoded as `0` bits by encoder
+     * MUST be ignored by decoders for purposes of decoding itself (MUST NOT affect result of decoding even if `1`)
+     * MAY, however, be verified by decoder but if so MUST NOT fail decoding by default; decoders MAY however report non-compliant `1` bits as warnings
+     * Decoders MAY additionally expose optional "strict" mode in which such non-compliant bit encoding does result in an error and decoding failure
 * Strings are encoded using standard UTF-8 encoding; length is indicated either by using:
     * 6-bit byte length prefix, for lengths 1 - 63 (0 is not used since there is separate token)
     * End-of-String marker byte (0xFC) for variable length Strings.
@@ -105,16 +111,20 @@ Some general notes on tokens:
     * This means that 2 byte VInt has 13 data bits, for example; and minimum number of bytes to represent a Java long (64 bits) is 10; 9 bytes would give 62 bits (8 * 7 + 6).
     * Signed VInt values are handled using "zigzag" encoding, where sign bit is shifted to be the least-significant bit, and value is shifted left by one (i.e. multiplied by two).
     * Unsigned VInts used as length indicators do NOT use zigzag encoding (since it is only needed to help with encoding of negative values)
+    * "Unused" bits in the last encoded byte should be handled as per earlier general note: left as `0`
 * Length indicators are done using VInts (for binary data, unlimited length ("big") integer/decimal values)
     * All length indicators define _actual_ length of data; not possibly encoded length (in case of "safe" encoding, encoded data is longer, and that length can be calculated from payload data length)
+    * "Unused" bits in the last encoded byte should be handled as per earlier general note: left as `0`    
 * Floating point values (IEEE 32 and 64-bit) are encoded using fixed-length big-endian encoding (7 bits used to avoid use of reserved bytes like 0xFF):
     * Data is "right-aligned", meaning padding is prepended to the first byte (and its MSB).
     * For example, the 32-bit float `29.9510 is` encoded as `0x26 0x37 0x3E 0x0F 0x04.` We get to this encoding by taking the IEEE 764 32-bit binary representation of the number 29.9510, (1) writing the least-significant 7 bits, (2) right-shifting 7 bits, and repeating the process until encoding the entire bit-string (5 times for a 32-bit float). As a result, 0x26 = 29.9510 & 0x7F, 0x37 = (29.9510 >> 7) & 0x7F, 0x3E = (29.9510 >> 14) & 0x7F, 0x0F = (29.9510 >> 21) & 0x7F, and 0x04 = (29.9510 >> 28) & 0x7F.
+    * "Unused" bits in the last encoded byte should be handled as per earlier general note: left as `0`    
 * "Big" decimal/integer values use "safe" binary encoding
 * "Safe" binary encoding simply uses 7 LSB (sign bit, MSB, is left as 0).
     * The last encoded byte contains 1 - 7 bits: if less than 7, data is "right-aligned", contained in Least-Significant Bits; there will be 0-6 MSB padding bits.
     * For example: when encoding 4 bytes (32 bits), the first full (7-bit) encoded bytes (`0vvvvvvv`) are followed by an incomplete byte containing 4 value bits: `0000vvvv`.
-    * NOTE: before version 1.0.5 above statemet claimed incorrect alignment (claiming padding would be for LSB)
+    * NOTE: before version 1.0.5 above statement claimed incorrect alignment (claiming padding would be for LSB)
+    * "Unused" bits in the last encoded byte should be handled as per earlier general note: left as `0`    
 
 ### Tokens: value mode
 
@@ -161,6 +171,7 @@ Prefix: 0x20; covers byte values 0x20 - 0x3F, although not all values are used
         * 0x2A: `BigDecimal`
             * Encoded as token indicator followed by zigzag encoded scale (32-bit), followed by 7-bit escaped binary (with Unsigned VInt (no-zigzag encoding) as length indicator) that represent magnitude value (byte array) of integral part.
        * 0x2B - reserved for future use
+    * Note that possible "unused" bits in the last encoded byte should be handled as per earlier general note: left as `0`, ignored on decoding.
 * Reserved for future use, avoided (decoding error if found)
     * 0x2C - 0x2F reserved for future use (non-overlapping with keys)
     * 0x30 - 0x3F overlapping with key mode and/or header (0x3A)
