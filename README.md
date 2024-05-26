@@ -37,6 +37,8 @@ Smile Codecs
 * JVM, other:
     * [Clojure](http://clojure.org) 
         * [Cheshire](https://github.com/dakrone/cheshire) library offers support via Jackson `jackson-dataformat-smile`
+* Kotlin Multiplatform
+   * [kotlinx-serialization-smile](https://github.com/vooft/kotlinx-serialization-smile) pure Kotlin Multiplatform implementation for `kotlinx-serialization`, supports JVM, Native, JS, etc
 * C
     * [libsmile](https://github.com/pierre/libsmile) is a small C-library for reading and writing Smile data.
 * Go
