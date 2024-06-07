@@ -29,26 +29,25 @@ Design documentation includes:
 
 Smile Codecs
 
+*  [Clojure](http://clojure.org) 
+    * [Cheshire](https://github.com/dakrone/cheshire) library offers support via Jackson `jackson-dataformat-smile`
+* C
+    * [libsmile](https://github.com/pierre/libsmile) is a small C-library for reading and writing Smile data.
+* Go
+    * [go-smile](https://github.com/zencoder/go-smile) Smile decoder written in Golang.
 * Java
     * [Jackson](../../../jackson) provides Smile support through [jackson-dataformat-smile](../../../jackson-dataformats-binary) modules) format codec
         * Full support: including streaming access, data binding and tree model (100% parity with textual JSON)
         * [Jackson 2.9](https://github.com/FasterXML/jackson/wiki/Jackson-Release-2.9) added "non-blocking" ((aka "asynchronous") decoding for JSON and Smile format backends
     * [Protostuff](http://github.com/protostuff/protostuff) project supports Smile both as a low-level data format, and as format used for its RPC implementation
-* JVM, other:
-    * [Clojure](http://clojure.org) 
-        * [Cheshire](https://github.com/dakrone/cheshire) library offers support via Jackson `jackson-dataformat-smile`
-* Kotlin Multiplatform
-   * [kotlinx-serialization-smile](https://github.com/vooft/kotlinx-serialization-smile) pure Kotlin Multiplatform implementation for `kotlinx-serialization`, supports JVM, Native, JS, etc
-* C
-    * [libsmile](https://github.com/pierre/libsmile) is a small C-library for reading and writing Smile data.
-* Go
-    * [go-smile](https://github.com/zencoder/go-smile) Smile decoder written in Golang.
 * Javascript
-    * [smile-js](https://github.com/ngyewch/smile-js) Smile decoder written in Javascript
+    * [smile-js](https://github.com/ngyewch/smile-js) Smile decoder written in Javascript* 
+* Kotlin Multiplatform
+    * [kotlinx-serialization-smile](https://github.com/vooft/kotlinx-serialization-smile) pure Kotlin Multiplatform implementation for `kotlinx-serialization`, supports JVM, Native, JS, etc
 * Python
-    * **NEW! (2022/11)[NewSmile](https://pypi.org/project/newsmile/) Another Smile Format Decoder/Encoder for Python 3
+    * [NewSmile](https://pypi.org/project/newsmile/) Another Smile Format Decoder/Encoder for Python 3
     * [PySmile](https://github.com/jhosmer/PySmile) Python codec
- * Rust
+* Rust
     * [serde-smile](https://github.com/sfackler/serde-smile) Serde serializer and deserializer written in Rust.
 
 Frameworks, Systems that use Smile codec (encoder and decoder)
