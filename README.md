@@ -41,7 +41,7 @@ Smile Codecs
         * [Jackson 2.9](https://github.com/FasterXML/jackson/wiki/Jackson-Release-2.9) added "non-blocking" ((aka "asynchronous") decoding for JSON and Smile format backends
     * [Protostuff](http://github.com/protostuff/protostuff) project supports Smile both as a low-level data format, and as format used for its RPC implementation
 * Javascript
-    * [smile-js](https://github.com/ngyewch/smile-js) Smile decoder written in Javascript* 
+    * [smile-js](https://github.com/ngyewch/smile-js) Smile decoder written in Javascript (only decodes (reads), does not encode (write)) 
 * Kotlin Multiplatform
     * [kotlinx-serialization-smile](https://github.com/vooft/kotlinx-serialization-smile) pure Kotlin Multiplatform implementation for `kotlinx-serialization`, supports JVM, Native, JS, etc
 * Python
