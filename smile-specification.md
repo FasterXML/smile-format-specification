@@ -318,11 +318,14 @@ Shared key resolution is done same way as shared String value resolution, but bu
 #### Avoiding references `0x??FE` and `0x??FF`
 
 In order to avoid encoding bytes with values of `0xFE` and `0xFF` (similar to "Safe Binary Encoding"), a small number of otherwise referencable Value and Key Name Strings MUST NOT BE referenced by encoders.
-Decoder may (but do not have to) verify that no such references are found (and can choose to not keep track of such non-referenable Value/Key name Strings on decoding).
 
-Basically, of all possible values for long references -- `0x0040` - `0x03FF` -- ones where lower byte is `0xFE` or `0xFF` must be skipped (high order byte can never conflict).
-So, references like `0x00FE`, `0x00FF`, `0x1FE`, ... `0x3FF` MUST NOT BE used.
+Basically, of all possible values for long references -- `0x0040` - `0x03FF` -- ones where lower byte is `0xFE` or `0xFF` must be avoided by generator (high order byte can never conflict).
+So, references like `0x00FE`, `0x00FF`, `0x1FE`, ... `0x3FF` MUST NOT BE used during encoding.
 Generators can implement block in different ways but possible the simplest is to simply not store lookup entries for these indexes.
+
+On decoder side decoder must keep track of these indexes (in the sense that non-shared Value/Key String has specific back reference index) but should not received any back references.
+Decoder may (but do not have to) verify that no such references are found.
+It may also choose to not keep track of such non-referencable Value/Key name Strings on decoding.
 
 NOTE: while this requirement has been implemented by some Codecs (Jackson, in particular), it was not formally documented prior to specification version 1.0.6. It is considered a requirement of Smile v1 format encoders.
 
