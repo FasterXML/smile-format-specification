@@ -112,7 +112,7 @@ Some general notes on tokens:
     * Signed VInt values are handled using "zigzag" encoding, where sign bit is shifted to be the least-significant bit, and value is shifted left by one (i.e. multiplied by two).
     * Unsigned VInts used as length indicators do NOT use zigzag encoding (since it is only needed to help with encoding of negative values)
     * "Unused" bits in the last encoded byte should be handled as per earlier general note: left as `0`
-* Length indicators are done using VInts (for binary data, unlimited length ("big") integer/decimal values)
+* Length indicators are done using VInts (for binary data, ("big") integer/decimal values)
     * All length indicators define _actual_ length of data; not possibly encoded length (in case of "safe" encoding, encoded data is longer, and that length can be calculated from payload data length)
     * "Unused" bits in the last encoded byte should be handled as per earlier general note: left as `0`    
 * Floating point values (IEEE 32 and 64-bit) are encoded using fixed-length big-endian encoding (7 bits used to avoid use of reserved bytes like `0xFF`):
@@ -122,9 +122,9 @@ Some general notes on tokens:
 * "Big" decimal/integer values use "safe" binary encoding
 * "Safe" binary encoding simply uses 7 LSB (sign bit, MSB, is left as 0).
     * The last encoded byte contains 1 - 7 bits: if less than 7, data is "right-aligned", contained in Least-Significant Bits; there will be 0-6 MSB padding bits.
-    * For example: when encoding 4 bytes (32 bits), the first full (7-bit) encoded bytes (`0vvvvvvv`) are followed by an incomplete byte containing 4 value bits: `0000vvvv`.
-    * NOTE: before version 1.0.5 above statement claimed incorrect alignment (claiming padding would be for LSB)
-    * "Unused" bits in the last encoded byte should be handled as per earlier general note: left as `0`    
+    * For example: when encoding 4 bytes (32 bits), the first 4 full (7-bit) encoded bytes (`0vvvvvvv`) -- ncoding 28 most-significant bits  -- are followed by one incomplete byte containing the last 4 value bits: `0000vvvv`.
+    * NOTE: before version 1.0.5 above statement claimed incorrect alignment (claiming padding would be for the LSB of output byte; instead of LSB containing actual value bits)
+    * "Unused" bits in the last encoded byte should be handled as per earlier general note: left as `0`.
 
 ### Tokens: value mode
 
@@ -313,7 +313,7 @@ Shared key resolution is done same way as shared String value resolution, but bu
 
 ## Future improvement ideas
 
-'''NOTE''': version 1.0 will '''NOT''' support any of features presented in this section; they are documented as ideas for future work.
+**NOTE**': version 1.0 does **'NOT**' support any of features presented in this section; they are documented as ideas for future work.
 
 ### In-frame compression?
 
