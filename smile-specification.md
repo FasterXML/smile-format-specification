@@ -12,13 +12,15 @@ This page covers current data format specification; which is planned to eventual
 
 ### Version history
 
-* Current: 1.0.5 (26-Jan-2022)
-     * Previous: 1.0.4 (12-May-2013)
+* Current: 1.0.6 (18-Apr-2025)
+     * Previous: 1.0.5 (26-Jan-2022)
 * First official: 1.0.0 (12-Sep-2010)
 * First draft: (24-Jun-2010)
 
 ### Update history
 
+* 2025-05-18: Explained existing (implement by Jackson codec) but previously undocumented requirement to skip Shared String/Key Name references ending with `0xFE` / `0xFF` bytes.
+    * Version 1.0.5 -> 1.0.6
 * 2022-02-20: Clarify handling of "unused" bits (see issue #17) primarily regarding encoding of floating-point numbers, but more generally for all unused bits.
 * 2022-01-26: Important fix to encoding of 7-bit encoded (safe) binary, wrt padding of the last byte.
      * Version 1.0.4 -> 1.0.5
@@ -66,9 +68,9 @@ Header consists of:
 * Variable byte #3, consisting of bits:
     * Bits 4-7 (4 MSB): 4-bit version number; `0x00` for current version (note: it is possible that some bits may be reused if necessary)
     * Bits 3: Reserved
-    * Bit 2 (mask `0x04`) Whether '''raw binary''' (unescaped 8-bit) values may be present in content
-    * Bit 1 (mask `0x02`): Whether '''shared String value''' checking was enabled during encoding -- if header missing, default value of "false" must be assumed for decoding (meaning parser need not store decoded String values for back referencing)
-    * Bit 0 (mask `0x01`): Whether '''shared property name''' checking was enabled during encoding -- if header missing, default value of "true" must be assumed for decoding (meaning parser MUST store seen property names for possible back references)
+    * Bit 2 (mask `0x04`) Whether "raw binary" (unescaped 8-bit) values may be present in content
+    * Bit 1 (mask `0x02`): Whether "shared String value" checking was enabled during encoding -- if header missing, default value of `false` must be assumed for decoding (meaning parser need not store decoded String values for back referencing)
+    * Bit 0 (mask `0x01`): Whether "'shared property name" checking was enabled during encoding -- if header missing, default value of `true` must be assumed for decoding (meaning parser MUST store seen property names for possible back references)
  
 And basically first 2 bytes form simple smiley and 3rd byte is a (Unix) linefeed: this to make command-line-tool based identification simple: choice of bytes is not significant beyond visual appearance. Fourth byte contains minimal versioning marker and additional configuration bits.
 
@@ -230,11 +232,12 @@ This class is further divided in 8 sub-section, using value of bits #2, #3 and #
     * followed by VInt length indicator, then data in 7/8 encoding (only 7 LSB of each byte used [sign bit always 0]; 8 such bytes are used to encode 7 "raw" bytes)
 	* Due to alignment the last byte may contain fewer than 7 bits: if so, the LSB bits contain data and up to 7 MSB may be left as 0 (the highest bit, sign bit, is always 0).
 	* NOTE: before version 1.0.5, some documentation suggested padding would be for LSB -- this is NOT the case.
-* `0xEC`: Shared String reference, long
+* `0xEC`: Shared String reference, Long
     * 2 LSB (`0x03`): used as 2 MSB of index
     * followed by byte used as 8 LSB of index
-    * Resulting 10-bit index used as is; values 0-30 are not to be used (instead, short reference must be used)
-    * Back references are ONLY made to "short" and "tiny" Ascii/Unicode Strings, so generator and parser only need to retain references to these Strings and not "long" (aka variable length) Strings.
+        * NOTE: this byte MUST NOT BE `0xFE` or `0xFF` -- generator MUST ensure avoidance (meaning that a small number of non-Shared Strings can not be referenced at all)
+    * Resulting 10-bit index used as is; values 0-30 are not to be used (instead, Short reference must be used)
+    * Back references are ONLY made to "short" and "tiny" ASCII/Unicode Strings, so generator and parser only need to retain references to these Strings and not "long" (aka variable length) Strings.
 * `0xF0` - `0xF7`: not used, reserved for future use (NOTE: used in key mode)
 * `0xF8` - `0xFB`: Structural markers
     * `0xF8`: `START_ARRAY`
@@ -259,8 +262,9 @@ Byte ranges are divides in 4 main sections (64 byte values each):
     * `0x00` - `0x1F`: not used, reserved for future versions
     * `0x20`: Special constant name "" (empty String)
     * `0x21` - `0x2F`: reserved for future use (unused for now to reduce overlap between values)
-    * `0x30` - `0x33`: "Long" shared key name reference (2 byte token); 2 LSBs of the first byte are used as 2 MSB of 10-bit reference (up to 1024) values to a shared name: second byte used for 8 LSB.
+    * `0x30` - `0x33`: "Long" shared key name reference (2 byte token); 2 LSBs of the first byte are used as 2 MSB of 10-bit reference (up to 1024) values to a shared name: second byte used for 8 LSB of 10-bit reference.
         * Note: combined values of 0 through 64 are reserved, since there is more optimal representation -- encoder is not to produce such "short long" values; decoder should check that these are not encountered. Future format versions may choose to use these for specific use.
+        * NOTE: second byte MUST NOT BE `0xFE` or `0xFF` -- generator MUST ensure avoidance (meaning that a small number of non-Shared Names can not be referenced at all)
     * `0x34`: Long (not-yet-shared) Unicode name. Variable-length String; token byte is followed by 64 or more bytes, followed by end-of-String marker byte.
         * Note: encoding of Strings shorter than 56 bytes should NOT be done using this type: if such sequence is detected it MAY be considered an error. Further, for ASCII names, Strings with length of 56-64 should also use short String notation
     * `0x35` - `0x39`: not used, reserved for future versions
@@ -268,10 +272,10 @@ Byte ranges are divides in 4 main sections (64 byte values each):
     * `0x3B` - `0x3F`: not used, reserved for future versions
 * `0x40` - `0x7F`: "Short" shared key name reference; names 0 through 63.
 * `0x80` - `0xBF`: Short ASCII names
-    * Names consisting of 1 - 64 bytes, all of which represent UTF-8 Ascii characters (MSB not set) -- special case to potentially allow faster decoding
+    * Names consisting of 1 - 64 bytes, all of which represent UTF-8 ASCII characters (MSB not set) -- special case to potentially allow faster decoding
 * `0xC0` - `0xF7`: Short Unicode names
     * Names consisting of 2 - 57 bytes that can potentially contain UTF-8 multi-byte sequences: encoders are NOT required to guarantee there is one, but for decoding efficiency reasons are recommended to check (that is: decoders on many platforms will be able to handle ASCII-sequences more efficiently than general UTF-8 names)
-* `0xF8` - `0xFA`: reserved (avoid overlap with START/END_ARRAY, START_OBJECT)
+* `0xF8` - `0xFA`: reserved (avoid overlap with `START_ARRAY`/`END_ARRAY`, `START_OBJECT`)
 * `0xFB`: `END_OBJECT` marker
 * `0xFC` - `0xFF`: reserved for framing, not used in key mode (used in value mode)
 
@@ -280,22 +284,24 @@ Byte ranges are divides in 4 main sections (64 byte values each):
 Shared Strings refer to already encoded/decoded key names or value strings. The method used for indicating which of "already seen" String values to use is designed to allow for:
 
 * Efficient encoding AND decoding (without necessarily favoring either)
+    * NOTE: data structures differ, however; encoder usually requires (hash) lookup whereas decoder can use simple index-accessible Array or List so typically encoder has somewhat higher overhead
 * To allow keeping only limited amount of buffering (of already handled names) by both encoder and decoder; this is especially beneficial to avoid unnecessary overhead for cases where there are few back references (mostly or completely unique values)
 
-Mechanism for resolving value string references differs from that used for key name references, so two are explained separately below.
+Mechanism for resolving value string references differs from that used for key name references, so the two are explained separately below.
 
 #### Shared value Strings
 
 Support for shared value Strings is optional, in that generator can choose to either check for shareable value Strings or omit the checks.
-Format header will indicate which option generator chose: if header is missing, default value of "false" (no checks done for shared value Strings; no back-references exist in encoded content) must be assumed.
+Format header will indicate which option generator chose: if header is missing, default value of `false` (no checks done for shared value Strings; no back-references exist in encoded content) must be assumed.
 
 One basic limitation is the encoded byte length of a String value that can be referenced is 64 bytes or less. Longer Strings can not be referenced. This is done as a performance optimization, as longer Strings are less likely to be shareable; and also because equality checks for longer Strings are most costly.
 As a result, parser only should keep references for eligible Strings during parsing.
 
 Reference length allowed by format is 10 bits, which means that encoder can replace references to most recent 1024 potentially shareable (referenceable) value Strings.
 
-For both encoding (writing) and decoding (parsing), same basic sliding-window algorithm is used: when a potentially eligible String value is to be written, generator can check whether it has already written such a String, and has retained reference. If so, reference value (between 0 and 1023) can be written instead of String value.
-If no such String has been written (as per generator's knowledge -- it is not required to even check this), value is to be written. If its encoded length indicates that it is indeeed shareable (which can not be known before writing, as check is based on byte length, not character length!), decoder is to add value into its shareable String buffer -- as long as buffer size does not exceed that of 1024 values. If it already has 1024 values, it MUST clear out buffer and start from first entry. This means that reference values are NOT relative back references, but rather offsets from beginning of reference buffer.
+For both encoding (writing) and decoding (parsing), same basic tumbling-window algorithm is used: when a potentially eligible String value is to be written, generator can check whether it has already written such a String, and has retained reference. If so, reference value (between 0 and 1023 -- but with limits, see "Avoding References" below) can be written instead of String value.
+If no such String has been written (as per generator's knowledge -- it is not required to even check this and lookup data structure may be lossy and only recognize some formerly written Strings), value is to be written.
+If its encoded length indicates that it is indeeed shareable (which can not be known before writing, as check is based on byte length, not character length!), decoder is to add value into its shareable String buffer -- as long as buffer size does not exceed that of 1024 values. If it already has 1024 values, it MUST clear out buffer and start from first entry. This means that reference values are NOT relative back references, but rather offsets from beginning of reference buffer.
 
 Similarly, parser has to keep track of decoded short (byte length <= 64 bytes) Strings seen so far, and have buffer of up to 1024 such values; clearing out buffer when it fills is done same way as during content generation.
 Any shared string value references are resolved against this buffer.
@@ -308,6 +314,20 @@ Support for shared property names is optional, in that generator can choose to e
 Format header will indicate which option generator chose: if header is missing, default value of "trues" (checking done for shared property names is made, and encoded content MAY contain back-references to share names) must be assumed.
 
 Shared key resolution is done same way as shared String value resolution, but buffers used are separate. Buffer sizes are same, 1024.
+
+#### Avoiding references `0x??FE` and `0x??FF`
+
+In order to avoid encoding bytes with values of `0xFE` and `0xFF` (similar to "Safe Binary Encoding"), a small number of otherwise referencable Value and Key Name Strings MUST NOT BE referenced by encoders.
+
+Basically, of all possible values for long references -- `0x0040` - `0x03FF` -- ones where lower byte is `0xFE` or `0xFF` must be avoided by generator (high order byte can never conflict).
+So, references like `0x00FE`, `0x00FF`, `0x1FE`, ... `0x3FF` MUST NOT BE used during encoding.
+Generators can implement block in different ways but possible the simplest is to simply not store lookup entries for these indexes.
+
+On decoder side decoder must keep track of these indexes (in the sense that non-shared Value/Key String has specific back reference index) but should not received any back references.
+Decoder may (but do not have to) verify that no such references are found.
+It may also choose to not keep track of such non-referencable Value/Key name Strings on decoding.
+
+NOTE: while this requirement has been implemented by some Codecs (Jackson, in particular), it was not formally documented prior to specification version 1.0.6. It is considered a requirement of Smile v1 format encoders.
 
 -----
 
