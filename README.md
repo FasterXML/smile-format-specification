@@ -1,11 +1,16 @@
 # Smile Data Format
 
 "Smile" is a binary data format that defines a binary equivalent of standard
-[JSON](http://en.wikipedia.org/wiki/JSON) data format.
+[JSON](http://en.wikipedia.org/wiki/JSON) data format (*).
 
 Format was specified in 2010 by [Jackson](../../../jackson) JSON processor development team.
 First compliant implementation was included as a Jackson backend for Jackson version 1.6,
 released in September 2010.
+
+(*) with following exceptions
+
+* Number magnitude and precision are limited by length-indicators: so
+  while for most practical purposes limits are never reached, there are theoretical limits. Specifically, "Big Integers" and "Big Decimals" (matching Java `java.math.BigInteger` and `java.math.BigDecimal`) are limited to encoded byte-lengths representable by 32-bit positive integers (about 2 GB).
 
 ##  Specification
 
