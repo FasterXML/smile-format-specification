@@ -19,6 +19,7 @@ This page covers current data format specification; which is planned to eventual
 
 ### Update history
 
+* 2025-05-18: Added notes on encoding of Empty String (not back-referencable, must use specific token)
 * 2025-05-18: Explained existing (implement by Jackson codec) but previously undocumented requirement to skip Shared String/Key Name references ending with `0xFE` / `0xFF` bytes.
     * Version 1.0.5 -> 1.0.6
 * 2022-02-20: Clarify handling of "unused" bits (see issue #17) primarily regarding encoding of floating-point numbers, but more generally for all unused bits.
@@ -158,6 +159,7 @@ Prefix: `0x20`; covers byte values `0x20` - `0x3F`, although not all values are 
 
 * Literals (simple, non-structured)
     * `0x20`: "" (empty String)
+        * NOTE: empty String values MUST be always encoded as this token and not using other String value types (or back references)
     * `0x21`: null
     * `0x22` / `0x23`: `false` / `true`
 * Numbers:
@@ -261,6 +263,7 @@ Byte ranges are divides in 4 main sections (64 byte values each):
 * `0x00` - `0x3F`: miscellaneous
     * `0x00` - `0x1F`: not used, reserved for future versions
     * `0x20`: Special constant name "" (empty String)
+        * NOTE: empty Name string MUST be encoded using this token and not as Short name.
     * `0x21` - `0x2F`: reserved for future use (unused for now to reduce overlap between values)
     * `0x30` - `0x33`: "Long" shared key name reference (2 byte token); 2 LSBs of the first byte are used as 2 MSB of 10-bit reference (up to 1024) values to a shared name: second byte used for 8 LSB of 10-bit reference.
         * Note: combined values of 0 through 64 are reserved, since there is more optimal representation -- encoder is not to produce such "short long" values; decoder should check that these are not encountered. Future format versions may choose to use these for specific use.
@@ -284,7 +287,7 @@ Byte ranges are divides in 4 main sections (64 byte values each):
 Shared Strings refer to already encoded/decoded key names or value strings. The method used for indicating which of "already seen" String values to use is designed to allow for:
 
 * Efficient encoding AND decoding (without necessarily favoring either)
-    * NOTE: data structures differ, however; encoder usually requires (hash) lookup whereas decoder can use simple index-accessible Array or List so typically encoder has somewhat higher overhead
+    * NOTE: data structures used typically differ, however; encoder usually requires (hash) lookup whereas decoder can use simple index-accessible Array or List so typically encoder has somewhat higher overhead
 * To allow keeping only limited amount of buffering (of already handled names) by both encoder and decoder; this is especially beneficial to avoid unnecessary overhead for cases where there are few back references (mostly or completely unique values)
 
 Mechanism for resolving value string references differs from that used for key name references, so the two are explained separately below.
@@ -314,6 +317,11 @@ Support for shared property names is optional, in that generator can choose to e
 Format header will indicate which option generator chose: if header is missing, default value of "trues" (checking done for shared property names is made, and encoded content MAY contain back-references to share names) must be assumed.
 
 Shared key resolution is done same way as shared String value resolution, but buffers used are separate. Buffer sizes are same, 1024.
+
+#### Empty Strings never shareable
+
+Empty String (`""`) as Value or Key String must always be encoded using specific token (`0x20`) in both modes.
+It MUST NOT be encoded as Short Value or Key String, nor considered as back-referencable value (and by extension never back-referenced).
 
 #### Avoiding references `0x??FE` and `0x??FF`
 
