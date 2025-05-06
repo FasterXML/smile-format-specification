@@ -19,8 +19,8 @@ This page covers current data format specification; which is planned to eventual
 
 ### Update history
 
-* 2025-05-18: Added notes on encoding of Empty String (not back-referencable, must use specific token)
-* 2025-05-18: Explained existing (implement by Jackson codec) but previously undocumented requirement to skip Shared String/Key Name references ending with `0xFE` / `0xFF` bytes.
+* 2025-04-18: Added notes on encoding of Empty String (not back-referencable, must use specific token)
+* 2025-04-18: Explained existing (implement by Jackson codec) but previously undocumented requirement to skip Shared String/Key Name references ending with `0xFE` / `0xFF` bytes.
     * Version 1.0.5 -> 1.0.6
 * 2022-02-20: Clarify handling of "unused" bits (see issue #17) primarily regarding encoding of floating-point numbers, but more generally for all unused bits.
 * 2022-01-26: Important fix to encoding of 7-bit encoded (safe) binary, wrt padding of the last byte.
