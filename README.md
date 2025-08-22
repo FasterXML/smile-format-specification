@@ -57,7 +57,7 @@ Smile Codecs
 
 Frameworks, Systems that use Smile codec (encoder and decoder)
 
-* [Apache Flink](https://flink.apache.org/) can use Smile for compiled plans.
+* [Apache Flink](https://flink.apache.org/) can use Smile for compiled plans (as of 2.1.0 via [FLINK-37341](https://issues.apache.org/jira/browse/FLINK-37341)
 * [Apache Solr](http://lucene.apache.org/solr) can use Smile as the response format with the `wt=smile` parameter.
 * [Elastic Search](http://www.elastic.co) uses Smile as transport format supports access using Smile encoding.
 
