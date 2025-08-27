@@ -12,13 +12,15 @@ This page covers current data format specification; which is planned to eventual
 
 ### Version history
 
-* Current: 1.0.6 (18-Apr-2025)
-     * Previous: 1.0.5 (26-Jan-2022)
+* Current: 1.0.7 (26-Aug-2025)
+     * Previous: 1.0.6 (18-Apr-2025)
 * First official: 1.0.0 (12-Sep-2010)
 * First draft: (24-Jun-2010)
 
 ### Update history
 
+* 2025-08-26: Corrected explanation and example of 32-bit `float` encoding
+    * Version 1.0.6 -> 1.0.7
 * 2025-05-18: Explained existing (implement by Jackson codec) but previously undocumented requirement to skip Shared String/Key Name references ending with `0xFE` / `0xFF` bytes.
     * Version 1.0.5 -> 1.0.6
 * 2022-02-20: Clarify handling of "unused" bits (see issue #17) primarily regarding encoding of floating-point numbers, but more generally for all unused bits.
@@ -117,10 +119,24 @@ Some general notes on tokens:
 * Length indicators are done using VInts (for binary data, ("big") integer/decimal values)
     * All length indicators define _actual_ length of data; not possibly encoded length (in case of "safe" encoding, encoded data is longer, and that length can be calculated from payload data length)
     * "Unused" bits in the last encoded byte should be handled as per earlier general note: left as `0`    
-* Floating point values (IEEE 32 and 64-bit) are encoded using fixed-length big-endian encoding (7 bits used to avoid use of reserved bytes like `0xFF`):
-    * Data is "right-aligned", meaning padding is prepended to the first byte (and its MSB).
-    * For example, the 32-bit float `29.9510 is` encoded as `0x26 0x37 0x3E 0x0F 0x04.` We get to this encoding by taking the IEEE 764 32-bit binary representation of the number 29.9510, (1) writing the least-significant 7 bits, (2) right-shifting 7 bits, and repeating the process until encoding the entire bit-string (5 times for a 32-bit float). As a result, `0x26` = `29.9510 & 0x7F`, `0x37` = `(29.9510 >> 7) & 0x7F`, `0x3E` = `(29.9510 >> 14) & 0x7F`, `0x0F` = `(29.9510 >> 21) & 0x7F`, and `0x04 = (29.9510 >> 28) & 0x7F`.
-    * "Unused" bits in the last encoded byte should be handled as per earlier general note: left as `0`
+* Floating point values (IEEE 32 and 64-bit) are encoded using fixed-length big-endian (MSB first) encoding (7 bits used to avoid use of reserved bytes like `0xFF`):
+    * Data is "right-aligned", meaning padding is prepended to the first byte (and specifically as MSB).
+    * For example, the 32-bit float `29.9510` is encoded as `0x04 0x0F 0x3E 0x37 0x26`. We get to this encoding by taking the IEEE 764 32-bit binary representation of the number `29.9510` -- `0x41ef9ba6` -- and:
+        1. writing the most-significant 4 bits (with 4-bit MSB padding),
+        2. followed by next-MSB 7 bits, and
+        3. repeating the process until encoding the entire bit-string (5 times for a 32-bit float).
+    * As a result we get:
+        1. `0x04' = '(29.9510 >> 28) & 0x7F`
+        2. `0x0F` = `(29.9510 >> 21) & 0x7F`
+        3. `0x3E` = `(29.9510 >> 14) & 0x7F`
+        4. `0x37` = `(29.9510 >> 7) & 0x7F`
+        5. `0x26` = `29.9510 & 0x7F`
+    * "Unused" bits (4 most-significant) in the first encoded byte should be handled as per earlier general note: left as `0`
+    * 64-bit `double` is handled similarly, so with sample value `-29.9510` we get:
+        * raw 64-bits: `0xc03df374bc6a7efa`
+        * encoded in 10 data bytes (1 bit in first, 9 x 7 bits)
+        * `0x01 0x40 0x1e 0x7c 0x6e 0x4b 0x63 0x29 0x7d 0x7a`
+    * Actual encoded value also has "type prefix byte -- `0x28` for `float` and `0x29` for `double`
 * "Big" decimal/integer values use "safe" binary encoding
 * "Safe" binary encoding simply uses 7 LSB (sign bit, MSB, is left as 0).
     * The last encoded byte contains 1 - 7 bits: if less than 7, data is "right-aligned", contained in Least-Significant Bits; there will be 0-6 MSB padding bits.
