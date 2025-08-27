@@ -124,7 +124,7 @@ Some general notes on tokens:
     * For example, the 32-bit float `29.9510` is encoded as `0x04 0x0F 0x3E 0x37 0x26`. We get to this encoding by taking the IEEE 764 32-bit binary representation of the number `29.9510` -- `0x41ef9ba6` -- and:
         1. writing the most-significant 4 bits (with 4-bit MSB padding),
         2. followed by next-MSB 7 bits, and
-        3. repeating the process until encoding the entire bit-string (5 times for a 32-bit float).
+        3. repeating the process until encoding the entire bit-string (5 bytes for a 32-bit float).
     * As a result we get:
         1. `0x04' = '(29.9510 >> 28) & 0x7F`
         2. `0x0F` = `(29.9510 >> 21) & 0x7F`
@@ -134,8 +134,8 @@ Some general notes on tokens:
     * "Unused" bits (4 most-significant) in the first encoded byte should be handled as per earlier general note: left as `0`
     * 64-bit `double` is handled similarly, so with sample value `-29.9510` we get:
         * raw 64-bits: `0xc03df374bc6a7efa`
-        * encoded in 10 data bytes (1 bit in first, 9 x 7 bits)
-        * `0x01 0x40 0x1e 0x7c 0x6e 0x4b 0x63 0x29 0x7d 0x7a`
+        * encode in 10 data bytes (1 bit in first, 9 x 7 bits), MSB first
+        * resulting bytes: `0x01 0x40 0x1e 0x7c 0x6e 0x4b 0x63 0x29 0x7d 0x7a`
     * Actual encoded value also has "type prefix byte -- `0x28` for `float` and `0x29` for `double`
 * "Big" decimal/integer values use "safe" binary encoding
 * "Safe" binary encoding simply uses 7 LSB (sign bit, MSB, is left as 0).
